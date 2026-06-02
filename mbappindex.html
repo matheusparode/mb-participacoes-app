@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0d5c2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MB Areias">
+<title>MB Areias — Registro de Entrega</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d5c2e; min-height: 100vh; display: flex; flex-direction: column; }
+.app-header { background: #0d5c2e; padding: 12px 16px 16px; display: flex; align-items: center; gap: 10px; padding-top: env(safe-area-inset-top, 12px); }
+.logo-mb { width: 46px; height: 46px; border-radius: 10px; background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.logo-mb svg { width: 42px; height: 42px; }
+.logo-text .logo-name { font-size: 15px; font-weight: 700; color: #fff; line-height: 1; }
+.logo-text .logo-sub { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px; }
+.motorista-pill { margin-left: auto; background: rgba(255,255,255,0.15); border-radius: 20px; padding: 5px 12px; }
+.motorista-pill span { font-size: 12px; color: #fff; font-weight: 500; }
+.nav-tabs { display: flex; background: #0a4a24; }
+.nav-tab { flex: 1; padding: 10px 4px 8px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.45); border: none; background: transparent; cursor: pointer; font-family: inherit; display: flex; flex-direction: column; align-items: center; gap: 3px; transition: all 0.2s; border-bottom: 3px solid transparent; }
+.nav-tab i { font-size: 20px; }
+.nav-tab.ativo { color: #fff; border-bottom-color: #f5c842; background: rgba(255,255,255,0.08); }
+.tab-content { display: none; flex: 1; background: #f0f2f5; }
+.tab-content.ativo { display: flex; flex-direction: column; }
+.form-scroll { padding: 14px 14px 80px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; flex: 1; }
+.fcard { background: #fff; border-radius: 12px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.fcard-title { font-size: 11px; font-weight: 700; color: #0d5c2e; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.fcard-title i { color: #1D9E75; font-size: 16px; }
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ffield { display: flex; flex-direction: column; gap: 5px; }
+.ffield.full { grid-column: 1 / -1; }
+.ffield label { font-size: 12px; color: #555; font-weight: 600; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.ffield input, .ffield select, .ffield textarea { border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 10px 12px; font-size: 14px; color: #111; background: #fafafa; width: 100%; font-family: inherit; transition: all 0.2s; -webkit-appearance: none; }
+.ffield textarea { resize: none; line-height: 1.5; }
+.ffield input.auto { border-color: #0d5c2e; background: #edfaf3; color: #0d5c2e; font-weight: 600; }
+.ffield input.preenchido, .ffield textarea.preenchido, .ffield select.preenchido { border-color: #1D9E75; background: #edfaf3; color: #0d5c2e; font-weight: 500; }
+.ffield input:focus, .ffield select:focus, .ffield textarea:focus { outline: none; border-color: #1D9E75; background: #fff; }
+.tag-auto { font-size: 10px; color: #0d5c2e; background: #c8f0dc; border-radius: 4px; padding: 2px 6px; font-weight: 600; }
+.tag-ia { font-size: 10px; color: #0d5c2e; background: #c8f0dc; border-radius: 4px; padding: 2px 5px; }
+.edit-hint { font-size: 11px; color: #aaa; display: flex; align-items: center; gap: 3px; }
+.section-divider { height: 1px; background: #e8f5ee; margin: 12px 0; }
+.modo-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
+.modo-btn { flex: 1; padding: 9px 6px; border-radius: 10px; border: 1.5px solid #e0e0e0; font-size: 13px; font-family: inherit; cursor: pointer; background: #f5f5f5; color: #888; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; font-weight: 500; }
+.modo-btn.ativo { background: #0d5c2e; border-color: #0d5c2e; color: #fff; font-weight: 600; }
+.upload-area { border: 2px dashed #b2d8c0; border-radius: 12px; padding: 20px 14px; text-align: center; cursor: pointer; background: #f5fdf8; transition: all 0.2s; }
+.upload-area.loading { border-color: #1D9E75; background: #edfaf3; }
+.upload-area.done { border-color: #0d5c2e; background: #edfaf3; cursor: default; }
+.upload-icon { font-size: 32px; color: #1D9E75; margin-bottom: 6px; }
+.upload-label { font-size: 13px; color: #1D9E75; font-weight: 500; }
+.upload-area.done .upload-label { color: #0d5c2e; font-weight: 600; }
+.progress-bar { height: 4px; background: #c8f0dc; border-radius: 2px; margin-top: 10px; overflow: hidden; display: none; }
+.progress-fill { height: 100%; background: #1D9E75; border-radius: 2px; width: 0%; transition: width 0.4s; }
+.upload-area.loading .progress-bar { display: block; }
+.ai-badge { display: none; align-items: center; gap: 5px; font-size: 11px; background: #c8f0dc; color: #0d5c2e; border-radius: 20px; padding: 4px 12px; margin-top: 8px; justify-content: center; font-weight: 600; }
+.upload-area.done .ai-badge { display: flex; }
+.campos-doc { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.manual-note { font-size: 12px; color: #0d5c2e; background: #edfaf3; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; border: 1px solid #b2d8c0; }
+.hint { font-size: 11px; color: #aaa; margin-top: 6px; }
+.sem-ocorrencia { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; cursor: pointer; padding: 6px 0; font-weight: 500; }
+.sem-ocorrencia input[type=checkbox] { width: 18px; height: 18px; accent-color: #0d5c2e; cursor: pointer; }
+
+/* Abastecimento */
+.fcard.abast .fcard-title { color: #1565C0; }
+.fcard.abast .fcard-title i { color: #1E88E5; }
+.fcard.abast .modo-btn.ativo { background: #1565C0; border-color: #1565C0; }
+.fcard.abast .upload-area { background: #f0f6ff; border-color: #90CAF9; }
+.fcard.abast .upload-area.loading, .fcard.abast .upload-area.done { border-color: #1E88E5; background: #e3f2fd; }
+.fcard.abast .upload-icon, .fcard.abast .upload-label { color: #1E88E5; }
+.fcard.abast .upload-area.done .upload-label { color: #1565C0; }
+.fcard.abast .progress-fill { background: #1E88E5; }
+.fcard.abast .ai-badge { background: #bbdefb; color: #1565C0; }
+.fcard.abast .manual-note { color: #1565C0; background: #e3f2fd; border-color: #90CAF9; }
+.fcard.abast .ffield input.preenchido, .fcard.abast .ffield select.preenchido { border-color: #1E88E5; background: #e3f2fd; color: #1565C0; }
+.total-box { background: #e3f2fd; border-radius: 10px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; }
+.total-box .tl { font-size: 13px; color: #1565C0; font-weight: 500; }
+.total-box .tv { font-size: 18px; font-weight: 700; color: #1565C0; }
+
+/* Manutenção */
+.fcard.manut .fcard-title { color: #7B3A10; }
+.fcard.manut .fcard-title i { color: #D2691E; }
+.fcard.manut .modo-btn.ativo { background: #7B3A10; border-color: #7B3A10; }
+.fcard.manut .upload-area { background: #fff8f4; border-color: #F5C6A0; }
+.fcard.manut .upload-area.loading, .fcard.manut .upload-area.done { border-color: #D2691E; background: #fff0e4; }
+.fcard.manut .upload-icon, .fcard.manut .upload-label { color: #D2691E; }
+.fcard.manut .upload-area.done .upload-label { color: #7B3A10; }
+.fcard.manut .progress-fill { background: #D2691E; }
+.fcard.manut .ai-badge { background: #FFD9BB; color: #7B3A10; }
+.fcard.manut .manual-note { color: #7B3A10; background: #fff0e4; border-color: #F5C6A0; }
+.fcard.manut .ffield input.preenchido, .fcard.manut .ffield select.preenchido, .fcard.manut .ffield textarea.preenchido { border-color: #D2691E; background: #fff0e4; color: #7B3A10; }
+
+/* KM */
+.fcard.km-card { border: 1.5px solid #C5CAE9; }
+.fcard.km-card .fcard-title { color: #3949AB; }
+.fcard.km-card .fcard-title i { color: #5C6BC0; }
+.fcard.km-card .modo-btn.ativo { background: #3949AB; border-color: #3949AB; }
+.fcard.km-card .upload-area { background: #f3f4fd; border-color: #9FA8DA; }
+.fcard.km-card .upload-area.loading, .fcard.km-card .upload-area.done { border-color: #5C6BC0; background: #e8eaf6; }
+.fcard.km-card .upload-icon, .fcard.km-card .upload-label { color: #5C6BC0; }
+.fcard.km-card .upload-area.done .upload-label { color: #3949AB; }
+.fcard.km-card .progress-fill { background: #5C6BC0; }
+.fcard.km-card .ai-badge { background: #C5CAE9; color: #3949AB; }
+.fcard.km-card .manual-note { color: #3949AB; background: #e8eaf6; border-color: #9FA8DA; }
+.km-box { background: #e8eaf6; border-radius: 10px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; }
+.km-box .tl { font-size: 13px; color: #3949AB; font-weight: 500; }
+.km-box .tv { font-size: 18px; font-weight: 700; color: #3949AB; }
+
+.btn-enviar { color: #fff; border: none; border-radius: 12px; padding: 15px; width: 100%; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; font-family: inherit; letter-spacing: 0.3px; active-opacity: 0.85; }
+.btn-enviar:active { opacity: 0.85; transform: scale(0.98); }
+.btn-entrega { background: #0d5c2e; }
+.btn-abast { background: #1565C0; }
+.btn-manut { background: #7B3A10; }
+.lock-note { font-size: 12px; color: #999; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 4px 0 8px; }
+
+/* Mensagem de sucesso */
+.success-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+.success-overlay.show { display: flex; }
+.success-box { background: #fff; border-radius: 16px; padding: 28px 24px; text-align: center; max-width: 280px; width: 100%; }
+.success-box i { font-size: 48px; color: #0d5c2e; display: block; margin-bottom: 12px; }
+.success-box h3 { font-size: 18px; color: #0d5c2e; margin-bottom: 8px; }
+.success-box p { font-size: 14px; color: #666; margin-bottom: 20px; }
+.success-box button { background: #0d5c2e; color: #fff; border: none; border-radius: 10px; padding: 12px 24px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="logo-mb">
+    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <rect width="80" height="80" fill="#fff"/>
+      <text x="40" y="34" text-anchor="middle" font-family="Arial Black,sans-serif" font-weight="900" font-size="28" fill="#0d5c2e">MB</text>
+      <text x="40" y="52" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="10" fill="#f5c842">AREIAS</text>
+      <rect x="10" y="56" width="60" height="2.5" fill="#f5c842" rx="1"/>
+    </svg>
+  </div>
+  <div class="logo-text">
+    <div class="logo-name">MB Areias</div>
+    <div class="logo-sub">Registro de entrega</div>
+  </div>
+  <div class="motorista-pill"><span id="nome-motorista">Motorista</span></div>
+</div>
+
+<div class="nav-tabs">
+  <button class="nav-tab ativo" onclick="showTab('entrega')" id="tab-entrega"><i class="ti ti-truck"></i>Entrega</button>
+  <button class="nav-tab" onclick="showTab('abast')" id="tab-abast"><i class="ti ti-gas-station"></i>Abastec.</button>
+  <button class="nav-tab" onclick="showTab('manut')" id="tab-manut"><i class="ti ti-tool"></i>Manutenção</button>
+</div>
+
+<!-- ABA ENTREGA -->
+<div class="tab-content ativo" id="content-entrega">
+  <div class="form-scroll">
+    <div class="fcard">
+      <div class="fcard-title"><i class="ti ti-truck"></i> Veículo</div>
+      <div class="ffield"><label>Placa</label><input type="text" id="e-placa" placeholder="Ex: LXS2752" style="font-family:monospace;font-weight:600;text-transform:uppercase" /></div>
+    </div>
+    <div class="fcard">
+      <div class="fcard-title"><i class="ti ti-calendar"></i> Data e horário</div>
+      <div class="frow">
+        <div class="ffield"><label>Data <span class="tag-auto">automático</span></label><input type="text" id="e-data" class="auto" readonly /><div class="edit-hint"><i class="ti ti-lock" style="font-size:11px"></i> Bloqueado</div></div>
+        <div class="ffield"><label>Horário <span class="tag-auto">automático</span></label><input type="time" id="e-hora" class="auto" /><div class="edit-hint"><i class="ti ti-pencil" style="font-size:11px"></i> Toque para alterar</div></div>
+      </div>
+    </div>
+    <div class="fcard">
+      <div class="fcard-title"><i class="ti ti-package-import"></i> Coleta do material</div>
+      <div class="modo-toggle">
+        <button class="modo-btn ativo" id="orig-btn-foto" onclick="setModo('orig','foto')"><i class="ti ti-camera" style="font-size:15px"></i> Fotografar</button>
+        <button class="modo-btn" id="orig-btn-manual" onclick="setModo('orig','manual')"><i class="ti ti-pencil" style="font-size:15px"></i> Manual</button>
+      </div>
+      <div id="orig-modo-foto">
+        <div class="upload-area" id="upload-orig" onclick="abrirCamera('orig')">
+          <div class="upload-icon"><i class="ti ti-camera" id="icon-orig"></i></div>
+          <div class="upload-label" id="label-orig">Fotografar nota fiscal / romaneio</div>
+          <div class="progress-bar"><div class="progress-fill" id="fill-orig"></div></div>
+          <div class="ai-badge"><i class="ti ti-sparkles" style="font-size:12px"></i> Lido pela IA</div>
+        </div>
+        <input type="file" id="file-orig" accept="image/*" capture="environment" style="display:none" onchange="processarImagem('orig', this)">
+      </div>
+      <div id="orig-modo-manual" style="display:none"><div class="manual-note"><i class="ti ti-info-circle" style="font-size:16px"></i> Preencha manualmente</div></div>
+      <div class="campos-doc" id="orig-campos" style="display:none">
+        <div class="frow"><div class="ffield full"><label>Local de coleta <span class="tag-ia" id="tag-orig-local" style="display:none">IA</span></label><input type="text" id="f-orig-local" placeholder="Endereço de coleta" /></div></div>
+        <div class="frow">
+          <div class="ffield"><label>Tipo de documento</label><select id="sel-orig-tipo"><option value="">Selecione...</option><option value="nf">Nota fiscal</option><option value="romaneio">Romaneio</option></select></div>
+          <div class="ffield"><label>Nº documento <span class="tag-ia" id="tag-orig-ndoc" style="display:none">IA</span></label><input type="text" id="f-orig-ndoc" placeholder="Número" /></div>
+        </div>
+        <div class="frow"><div class="ffield full"><label>Produto <span class="tag-ia" id="tag-orig-prod" style="display:none">IA</span></label>
+          <select id="f-orig-prod" onchange="toggleOutro('orig',this.value)">
+            <option value="">Selecione o produto...</option>
+            <optgroup label="Areias"><option>Areia Media Lavada</option><option>Areia Regular</option><option>Areia Fina</option><option>Areia Media de Rio</option></optgroup>
+            <optgroup label="Britas"><option>Brita Preta 00</option><option>Brita Preta 01</option><option>Brita Rosa 00</option><option>Brita Rosa 01</option><option>Brita Branca 00</option><option>Po de Brita</option></optgroup>
+            <optgroup label="Outro"><option value="outro">Outro (digitar)</option></optgroup>
+          </select></div></div>
+        <div class="frow" id="orig-outro-wrap" style="display:none"><div class="ffield full"><label>Descreva o produto</label><input type="text" placeholder="Digite..." /></div></div>
+        <div class="frow"><div class="ffield full"><label>Quantidade (m³ ou sacos) <span class="tag-ia" id="tag-orig-qtd" style="display:none">IA</span></label><input type="number" id="f-orig-qtd" placeholder="0.00" step="0.01" /></div></div>
+      </div>
+      <div class="section-divider"></div>
+      <div class="fcard-title" style="margin-top:4px"><i class="ti ti-map-pin-check"></i> Destino do material</div>
+      <div class="modo-toggle">
+        <button class="modo-btn ativo" id="dest-btn-foto" onclick="setModo('dest','foto')"><i class="ti ti-camera" style="font-size:15px"></i> Fotografar</button>
+        <button class="modo-btn" id="dest-btn-manual" onclick="setModo('dest','manual')"><i class="ti ti-pencil" style="font-size:15px"></i> Manual</button>
+      </div>
+      <div id="dest-modo-foto">
+        <div class="upload-area" id="upload-dest" onclick="abrirCamera('dest')">
+          <div class="upload-icon"><i class="ti ti-camera" id="icon-dest"></i></div>
+          <div class="upload-label" id="label-dest">Fotografar nota fiscal / romaneio</div>
+          <div class="progress-bar"><div class="progress-fill" id="fill-dest"></div></div>
+          <div class="ai-badge"><i class="ti ti-sparkles" style="font-size:12px"></i> Lido pela IA</div>
+        </div>
+        <input type="file" id="file-dest" accept="image/*" capture="environment" style="display:none" onchange="processarImagem('dest', this)">
+      </div>
+      <div id="dest-modo-manual" style="display:none"><div class="manual-note"><i class="ti ti-info-circle" style="font-size:16px"></i> Preencha manualmente</div></div>
+      <div class="campos-doc" id="dest-campos" style="display:none">
+        <div class="frow"><div class="ffield full"><label>Local de destino <span class="tag-ia" id="tag-dest-local" style="display:none">IA</span></label><input type="text" id="f-dest-local" placeholder="Endereço de destino" /></div></div>
+        <div class="frow">
+          <div class="ffield"><label>Tipo de documento</label><select id="sel-dest-tipo"><option value="">Selecione...</option><option value="nf">Nota fiscal</option><option value="romaneio">Romaneio</option></select></div>
+          <div class="ffield"><label>Nº documento <span class="tag-ia" id="tag-dest-ndoc" style="display:none">IA</span></label><input type="text" id="f-dest-ndoc" placeholder="Número" /></div>
+        </div>
+        <div class="frow"><div class="ffield full"><label>Produto <span class="tag-ia" id="tag-dest-prod" style="display:none">IA</span></label>
+          <select id="f-dest-prod" onchange="toggleOutro('dest',this.value)">
+            <option value="">Selecione o produto...</option>
+            <optgroup label="Areias"><option>Areia Media Lavada</option><option>Areia Regular</option><option>Areia Fina</option><option>Areia Media de Rio</option></optgroup>
+            <optgroup label="Britas"><option>Brita Preta 00</option><option>Brita Preta 01</option><option>Brita Rosa 00</option><option>Brita Rosa 01</option><option>Brita Branca 00</option><option>Po de Brita</option></optgroup>
+            <optgroup label="Outro"><option value="outro">Outro (digitar)</option></optgroup>
+          </select></div></div>
+        <div class="frow" id="dest-outro-wrap" style="display:none"><div class="ffield full"><label>Descreva o produto</label><input type="text" placeholder="Digite..." /></div></div>
+        <div class="frow"><div class="ffield full"><label>Quantidade <span class="tag-ia" id="tag-dest-qtd" style="display:none">IA</span></label><input type="number" id="f-dest-qtd" placeholder="0.00" step="0.01" /></div></div>
+      </div>
+    </div>
+    <button class="btn-enviar btn-entrega" onclick="enviar('Entrega registrada com sucesso!')"><i class="ti ti-send" style="font-size:17px"></i> Enviar entrega</button>
+    <div class="lock-note"><i class="ti ti-lock" style="font-size:13px"></i> Após enviar, o registro fica bloqueado</div>
+  </div>
+</div>
+
+<!-- ABA ABASTECIMENTO -->
+<div class="tab-content" id="content-abast">
+  <div class="form-scroll">
+    <div class="fcard">
+      <div class="fcard-title"><i class="ti ti-truck"></i> Veículo</div>
+      <div class="ffield"><label>Placa</label><input type="text" id="ab-placa" placeholder="Ex: LXS2752" style="font-family:monospace;font-weight:600;text-transform:uppercase" /></div>
+    </div>
+    <div class="fcard">
+      <div class="fcard-title"><i class="ti ti-calendar"></i> Data e horário</div>
+      <div class="frow">
+        <div class="ffield"><label>Data <span class="tag-auto">automático</span></label><input type="text" id="ab-data" class="auto" readonly /><div class="edit-hint"><i class="ti ti-lock" style="font-size:11px"></i> Bloqueado</div></div>
+        <div class="ffield"><label>Horário <span class="tag-auto">automático</span></label><input type="time" id="ab-hora" class="auto" /><div class="edit-hint"><i class="ti ti-pencil" style="font-size:11px"></i> Toque para alterar</div></div>
+      </div>
+    </div>
+    <div class="fcard abast">
+      <div class="fcard-title"><i class="ti ti-gas-station"></i> Abastecimento</div>
+      <div class="modo-toggle">
+        <button class="modo-btn ativo" id="abast-btn-foto" onclick="setModoAbast('foto')"><i class="ti ti-camera" style="font-size:15px"></i> Fotografar cupom</button>
+        <button class="modo-btn" id="abast-btn-manual" onclick="setModoAbast('manual')"><i class="ti ti-pencil" style="font-size:15px"></i> Manual</button>
+      </div>
+      <div id="abast-modo-foto">
+        <div class="upload-area" id="upload-abast" onclick="abrirCamera('abast')">
+          <div class="upload-icon"><i class="ti ti-camera" id="icon-abast"></i></div>
+          <div class="upload-label" id="label-abast">Fotografar cupom fiscal do posto</div>
+          <div class="progress-bar"><div class="progress-fill" id="fill-abast"></div></div>
+          <div class="ai-badge"><i class="ti ti-sparkles" style="font-size:12px"></i> Lido pela IA</div>
+        </div>
+        <input type="file" id="file-abast" accept="image/*" capture="environment" style="display:none" onchange="processarImagem('abast', this)">
+      </div>
+      <div id="abast-modo-manual" style="display:none"><div class="manual-note"><i class="ti ti-info-circle" style="font-size:16px"></i> Preencha os dados manualmente</div></div>
+      <div class="campos-doc" id="abast-campos" style="display:none">
+        <div class="frow"><div class="ffield full"><label>Nome do posto <span class="tag-ia" id="tag-abast-posto" style="display:none">IA</span></label><input type="text" id="f-abast-posto" placeholder="Ex: Posto Shell Av. Brasil" /></div></div>
+        <div class="frow">
+          <div class="ffield"><label>Combustível <span class="tag-ia" id="tag-abast-comb" style="display:none">IA</span></label>
+            <select id="f-abast-comb"><option value="">Selecione...</option><option>Diesel S10</option><option>Diesel Comum</option><option>Gasolina</option><option>Etanol</option><option>Arla 32</option></select>
+          </div>
+          <div class="ffield"><label>Litros <span class="tag-ia" id="tag-abast-litros" style="display:none">IA</span></label><input type="number" id="f-abast-litros" placeholder="0.00" step="0.01" onchange="calcTotal()" onkeyup="calcTotal()" /></div>
+        </div>
+        <div class="frow">
+          <div class="ffield"><label>Preço/litro <span class="tag-ia" id="tag-abast-preco" style="display:none">IA</span></label><input type="number" id="f-abast-preco" placeholder="R$ 0,00" step="0.01" onchange="calcTotal()" onkeyup="calcTotal()" /></div>
+          <div class="ffield"><label>KM atual <span class="tag-ia" id="tag-abast-km" style="display:none">IA</span></label><input type="number" id="f-abast-km" placeholder="Ex: 125000" /></div>
+        </div>
+        <div class="total-box"><span class="tl">Total do abastecimento</span><span class="tv" id="abast-total">R$ —</span></div>
+      </div>
+    </div>
+    <button class="btn-enviar btn-abast" onclick="enviar('Abastecimento registrado!')"><i class="ti ti-send" style="font-size:17px"></i> Registrar abastecimento</button>
+    <div class="lock-note"><i class="ti ti-lock" style="font-size:13px"></i> Após enviar, o registro fica bloqueado</div>
+  </div>
+</div>
+
+<!-- ABA MANUTENÇÃO -->
+<div class="tab-content" id="content-manut">
+  <div class="form-scroll">
+    <div class="fcard">
+      <div class="fcard-title"><i class="ti ti-truck"></i> Veículo</div>
+      <div class="ffield"><label>Placa</label><input type="text" id="mn-placa" placeholder="Ex: LXS2752" style="font-family:monospace;font-weight:600;text-transform:uppercase" /></div>
+    </div>
+    <div class="fcard">
+      <div class="fcard-title"><i class="ti ti-calendar"></i> Data e horário</div>
+      <div class="frow">
+        <div class="ffield"><label>Data <span class="tag-auto">automático</span></label><input type="text" id="mn-data" class="auto" readonly /><div class="edit-hint"><i class="ti ti-lock" style="font-size:11px"></i> Bloqueado</div></div>
+        <div class="ffield"><label>Horário <span class="tag-auto">automático</span></label><input type="time" id="mn-hora" class="auto" /><div class="edit-hint"><i class="ti ti-pencil" style="font-size:11px"></i> Toque para alterar</div></div>
+      </div>
+    </div>
+    <div class="fcard manut">
+      <div class="fcard-title"><i class="ti ti-tool"></i> Observações e manutenção</div>
+      <label class="sem-ocorrencia"><input type="checkbox" onchange="toggleSem(this.checked)" /> Sem ocorrências no veículo</label>
+      <div id="manut-conteudo" style="margin-top:12px">
+        <div class="modo-toggle">
+          <button class="modo-btn ativo" id="manut-btn-foto" onclick="setModoManut('foto')"><i class="ti ti-camera" style="font-size:15px"></i> Fotografar</button>
+          <button class="modo-btn" id="manut-btn-manual" onclick="setModoManut('manual')"><i class="ti ti-pencil" style="font-size:15px"></i> Descrever</button>
+        </div>
+        <div id="manut-modo-foto">
+          <div class="upload-area" id="upload-manut" onclick="abrirCamera('manut')">
+            <div class="upload-icon"><i class="ti ti-camera" id="icon-manut"></i></div>
+            <div class="upload-label" id="label-manut">Fotografar problema / manutenção</div>
+            <div class="progress-bar"><div class="progress-fill" id="fill-manut"></div></div>
+            <div class="ai-badge"><i class="ti ti-sparkles" style="font-size:12px"></i> Descrição gerada pela IA</div>
+          </div>
+          <input type="file" id="file-manut" accept="image/*" capture="environment" style="display:none" onchange="processarImagem('manut', this)">
+        </div>
+        <div id="manut-modo-manual" style="display:none"><div class="manual-note"><i class="ti ti-info-circle" style="font-size:16px"></i> Descreva o problema ou manutenção</div></div>
+        <div class="campos-doc" id="manut-campos" style="display:none">
+          <div class="frow"><div class="ffield full"><label>Tipo de ocorrência <span class="tag-ia" id="tag-manut-tipo" style="display:none">IA</span></label>
+            <select id="f-manut-tipo"><option value="">Selecione...</option>
+              <optgroup label="Manutenção"><option>Troca de óleo</option><option>Troca de pneu</option><option>Freios</option><option>Motor</option><option>Suspensão</option><option>Elétrica</option><option>Revisão geral</option></optgroup>
+              <optgroup label="Ocorrência"><option>Avaria na carroceria</option><option>Acidente</option><option>Pane mecânica</option><option>Multa de trânsito</option></optgroup>
+              <optgroup label="Outro"><option value="outro-manut">Outro (descrever)</option></optgroup>
+            </select></div></div>
+          <div class="frow"><div class="ffield full"><label>Descrição <span class="tag-ia" id="tag-manut-desc" style="display:none">IA</span></label><textarea id="f-manut-desc" rows="3" placeholder="Descreva o que aconteceu..."></textarea></div></div>
+          <div class="frow">
+            <div class="ffield"><label>KM atual</label><input type="number" placeholder="Ex: 125000" /></div>
+            <div class="ffield"><label>Urgência</label><select><option value="">Selecione...</option><option>🟢 Baixa</option><option>🟡 Média</option><option>🔴 Alta</option></select></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fcard km-card">
+      <div class="fcard-title"><i class="ti ti-road"></i> Quilometragem</div>
+      <div class="modo-toggle">
+        <button class="modo-btn ativo" id="km-btn-foto" onclick="setModoKm('foto')"><i class="ti ti-camera" style="font-size:15px"></i> Fotografar odômetro</button>
+        <button class="modo-btn" id="km-btn-manual" onclick="setModoKm('manual')"><i class="ti ti-pencil" style="font-size:15px"></i> Digitar</button>
+      </div>
+      <div id="km-modo-foto">
+        <div class="upload-area" id="upload-km" onclick="abrirCamera('km')">
+          <div class="upload-icon"><i class="ti ti-camera" id="icon-km"></i></div>
+          <div class="upload-label" id="label-km">Fotografar painel / odômetro</div>
+          <div class="progress-bar"><div class="progress-fill" id="fill-km"></div></div>
+          <div class="ai-badge"><i class="ti ti-sparkles" style="font-size:12px"></i> KM lido pela IA</div>
+        </div>
+        <input type="file" id="file-km" accept="image/*" capture="environment" style="display:none" onchange="processarImagem('km', this)">
+      </div>
+      <div id="km-modo-manual" style="display:none"><div class="manual-note" style="color:#3949AB;background:#e8eaf6;border-color:#9FA8DA"><i class="ti ti-info-circle" style="font-size:16px"></i> Digite a quilometragem atual</div></div>
+      <div class="campos-doc" id="km-campos" style="display:none">
+        <div class="frow">
+          <div class="ffield"><label>KM atual <span class="tag-ia" id="tag-km" style="display:none">IA</span></label><input type="number" id="f-km-atual" placeholder="125.847" onchange="calcKm()" onkeyup="calcKm()" /></div>
+          <div class="ffield"><label>KM anterior</label><input type="number" id="f-km-ant" placeholder="124.200" onchange="calcKm()" onkeyup="calcKm()" /></div>
+        </div>
+        <div id="km-percorrido" style="display:none" class="km-box">
+          <span class="tl">KM percorridos</span>
+          <span class="tv" id="km-total">—</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn-enviar btn-manut" onclick="enviar('Ocorrência registrada!')"><i class="ti ti-send" style="font-size:17px"></i> Registrar ocorrência</button>
+    <div class="lock-note"><i class="ti ti-lock" style="font-size:13px"></i> Após enviar, o registro fica bloqueado</div>
+  </div>
+</div>
+
+<!-- Overlay sucesso -->
+<div class="success-overlay" id="success-overlay">
+  <div class="success-box">
+    <i class="ti ti-circle-check"></i>
+    <h3 id="success-title">Registrado!</h3>
+    <p id="success-msg">Dados enviados e bloqueados com sucesso.</p>
+    <button onclick="fecharSucesso()">OK</button>
+  </div>
+</div>
+
+<script>
+function iniciar() {
+  const d = new Date();
+  const data = d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+  const hora = d.toTimeString().slice(0,5);
+  ['e-data','ab-data','mn-data'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=data; });
+  ['e-hora','ab-hora','mn-hora'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=hora; });
+  const nome = localStorage.getItem('mb_motorista') || 'Motorista';
+  document.getElementById('nome-motorista').textContent = nome;
+}
+iniciar();
+
+function showTab(t) {
+  ['entrega','abast','manut'].forEach(id=>{
+    document.getElementById('content-'+id).classList.toggle('ativo',id===t);
+    document.getElementById('tab-'+id).classList.toggle('ativo',id===t);
+  });
+}
+function toggleOutro(lado,val){ document.getElementById(lado+'-outro-wrap').style.display=val==='outro'?'grid':'none'; }
+function toggleSem(c){ document.getElementById('manut-conteudo').style.display=c?'none':'block'; }
+function calcTotal(){
+  const l=parseFloat(document.getElementById('f-abast-litros').value)||0;
+  const p=parseFloat(document.getElementById('f-abast-preco').value)||0;
+  const t=l*p;
+  document.getElementById('abast-total').textContent=t>0?'R$ '+t.toFixed(2).replace('.',','):'R$ —';
+}
+function calcKm(){
+  const a=parseFloat(document.getElementById('f-km-atual').value)||0;
+  const b=parseFloat(document.getElementById('f-km-ant').value)||0;
+  const box=document.getElementById('km-percorrido');
+  if(a>0&&b>0&&a>b){ box.style.display='flex'; document.getElementById('km-total').textContent=(a-b).toFixed(0)+' km'; }
+  else{ box.style.display='none'; }
+}
+function setModo(lado,modo){
+  document.getElementById(lado+'-modo-foto').style.display=modo==='foto'?'block':'none';
+  document.getElementById(lado+'-modo-manual').style.display=modo==='manual'?'block':'none';
+  document.getElementById(lado+'-btn-foto').classList.toggle('ativo',modo==='foto');
+  document.getElementById(lado+'-btn-manual').classList.toggle('ativo',modo==='manual');
+  if(modo==='manual') document.getElementById(lado+'-campos').style.display='flex';
+  else if(!lido[lado]) document.getElementById(lado+'-campos').style.display='none';
+}
+function setModoAbast(modo){
+  document.getElementById('abast-modo-foto').style.display=modo==='foto'?'block':'none';
+  document.getElementById('abast-modo-manual').style.display=modo==='manual'?'block':'none';
+  document.getElementById('abast-btn-foto').classList.toggle('ativo',modo==='foto');
+  document.getElementById('abast-btn-manual').classList.toggle('ativo',modo==='manual');
+  if(modo==='manual') document.getElementById('abast-campos').style.display='flex';
+}
+function setModoManut(modo){
+  document.getElementById('manut-modo-foto').style.display=modo==='foto'?'block':'none';
+  document.getElementById('manut-modo-manual').style.display=modo==='manual'?'block':'none';
+  document.getElementById('manut-btn-foto').classList.toggle('ativo',modo==='foto');
+  document.getElementById('manut-btn-manual').classList.toggle('ativo',modo==='manual');
+  if(modo==='manual') document.getElementById('manut-campos').style.display='flex';
+}
+function setModoKm(modo){
+  document.getElementById('km-modo-foto').style.display=modo==='foto'?'block':'none';
+  document.getElementById('km-modo-manual').style.display=modo==='manual'?'block':'none';
+  document.getElementById('km-btn-foto').classList.toggle('ativo',modo==='foto');
+  document.getElementById('km-btn-manual').classList.toggle('ativo',modo==='manual');
+  if(modo==='manual') document.getElementById('km-campos').style.display='flex';
+}
+
+function abrirCamera(tipo) {
+  document.getElementById('file-'+tipo).click();
+}
+
+const lido={orig:false,dest:false};
+function processarImagem(tipo, input) {
+  if(!input.files||!input.files[0]) return;
+  rodarUpload('upload-'+tipo,'fill-'+tipo,'icon-'+tipo,'label-'+tipo,'Analisando imagem...','Imagem processada com sucesso',()=>{
+    document.getElementById(tipo+'-campos') && (document.getElementById(tipo+'-campos').style.display='flex');
+    if(tipo==='abast'){ document.getElementById('abast-campos').style.display='flex'; }
+    if(tipo==='manut'){ document.getElementById('manut-campos').style.display='flex'; }
+    if(tipo==='km'){ document.getElementById('km-campos').style.display='flex'; }
+    lido[tipo]=true;
+  });
+}
+
+function rodarUpload(areaId,fillId,iconId,labelId,msgLoad,msgDone,cb){
+  const area=document.getElementById(areaId),fill=document.getElementById(fillId),icon=document.getElementById(iconId),label=document.getElementById(labelId);
+  if(!area) return;
+  area.classList.add('loading'); icon.className='ti ti-loader-2'; label.textContent=msgLoad;
+  let p=0; const iv=setInterval(()=>{ p+=10; fill.style.width=Math.min(p,92)+'%'; },150);
+  setTimeout(()=>{ clearInterval(iv); fill.style.width='100%'; setTimeout(()=>{ area.classList.remove('loading'); area.classList.add('done'); icon.className='ti ti-circle-check'; label.textContent=msgDone; cb(); },200); },1800);
+}
+
+function enviar(msg) {
+  document.getElementById('success-title').textContent = msg;
+  document.getElementById('success-overlay').classList.add('show');
+}
+function fecharSucesso() {
+  document.getElementById('success-overlay').classList.remove('show');
+}
+</script>
+</body>
+</html>
