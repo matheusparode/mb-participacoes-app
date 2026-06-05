@@ -61,8 +61,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .hint { font-size: 11px; color: #aaa; margin-top: 6px; }
 .sem-ocorrencia { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; cursor: pointer; padding: 6px 0; font-weight: 500; }
 .sem-ocorrencia input[type=checkbox] { width: 18px; height: 18px; accent-color: #0d5c2e; cursor: pointer; }
-
-/* Abastecimento */
 .fcard.abast .fcard-title { color: #1565C0; }
 .fcard.abast .fcard-title i { color: #1E88E5; }
 .fcard.abast .modo-btn.ativo { background: #1565C0; border-color: #1565C0; }
@@ -77,8 +75,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .total-box { background: #e3f2fd; border-radius: 10px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; }
 .total-box .tl { font-size: 13px; color: #1565C0; font-weight: 500; }
 .total-box .tv { font-size: 18px; font-weight: 700; color: #1565C0; }
-
-/* Manutenção */
 .fcard.manut .fcard-title { color: #7B3A10; }
 .fcard.manut .fcard-title i { color: #D2691E; }
 .fcard.manut .modo-btn.ativo { background: #7B3A10; border-color: #7B3A10; }
@@ -90,8 +86,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .fcard.manut .ai-badge { background: #FFD9BB; color: #7B3A10; }
 .fcard.manut .manual-note { color: #7B3A10; background: #fff0e4; border-color: #F5C6A0; }
 .fcard.manut .ffield input.preenchido, .fcard.manut .ffield select.preenchido, .fcard.manut .ffield textarea.preenchido { border-color: #D2691E; background: #fff0e4; color: #7B3A10; }
-
-/* KM */
 .fcard.km-card { border: 1.5px solid #C5CAE9; }
 .fcard.km-card .fcard-title { color: #3949AB; }
 .fcard.km-card .fcard-title i { color: #5C6BC0; }
@@ -106,15 +100,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .km-box { background: #e8eaf6; border-radius: 10px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; }
 .km-box .tl { font-size: 13px; color: #3949AB; font-weight: 500; }
 .km-box .tv { font-size: 18px; font-weight: 700; color: #3949AB; }
-
-.btn-enviar { color: #fff; border: none; border-radius: 12px; padding: 15px; width: 100%; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; font-family: inherit; letter-spacing: 0.3px; active-opacity: 0.85; }
+.btn-enviar { color: #fff; border: none; border-radius: 12px; padding: 15px; width: 100%; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; font-family: inherit; letter-spacing: 0.3px; }
 .btn-enviar:active { opacity: 0.85; transform: scale(0.98); }
+.btn-enviar:disabled { opacity: 0.6; cursor: not-allowed; }
 .btn-entrega { background: #0d5c2e; }
 .btn-abast { background: #1565C0; }
 .btn-manut { background: #7B3A10; }
 .lock-note { font-size: 12px; color: #999; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 4px 0 8px; }
-
-/* Mensagem de sucesso */
 .success-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
 .success-overlay.show { display: flex; }
 .success-box { background: #fff; border-radius: 16px; padding: 28px 24px; text-align: center; max-width: 280px; width: 100%; }
@@ -122,6 +114,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .success-box h3 { font-size: 18px; color: #0d5c2e; margin-bottom: 8px; }
 .success-box p { font-size: 14px; color: #666; margin-bottom: 20px; }
 .success-box button { background: #0d5c2e; color: #fff; border: none; border-radius: 10px; padding: 12px 24px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.erro-box { background: #fff0f0; border: 1px solid #ffcccc; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #c0392b; display: none; margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -191,7 +184,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
             <optgroup label="Britas"><option>Brita Preta 00</option><option>Brita Preta 01</option><option>Brita Rosa 00</option><option>Brita Rosa 01</option><option>Brita Branca 00</option><option>Po de Brita</option></optgroup>
             <optgroup label="Outro"><option value="outro">Outro (digitar)</option></optgroup>
           </select></div></div>
-        <div class="frow" id="orig-outro-wrap" style="display:none"><div class="ffield full"><label>Descreva o produto</label><input type="text" placeholder="Digite..." /></div></div>
+        <div class="frow" id="orig-outro-wrap" style="display:none"><div class="ffield full"><label>Descreva o produto</label><input type="text" id="f-orig-outro" placeholder="Digite..." /></div></div>
         <div class="frow"><div class="ffield full"><label>Quantidade (m³ ou sacos) <span class="tag-ia" id="tag-orig-qtd" style="display:none">IA</span></label><input type="number" id="f-orig-qtd" placeholder="0.00" step="0.01" /></div></div>
       </div>
       <div class="section-divider"></div>
@@ -223,11 +216,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
             <optgroup label="Britas"><option>Brita Preta 00</option><option>Brita Preta 01</option><option>Brita Rosa 00</option><option>Brita Rosa 01</option><option>Brita Branca 00</option><option>Po de Brita</option></optgroup>
             <optgroup label="Outro"><option value="outro">Outro (digitar)</option></optgroup>
           </select></div></div>
-        <div class="frow" id="dest-outro-wrap" style="display:none"><div class="ffield full"><label>Descreva o produto</label><input type="text" placeholder="Digite..." /></div></div>
+        <div class="frow" id="dest-outro-wrap" style="display:none"><div class="ffield full"><label>Descreva o produto</label><input type="text" id="f-dest-outro" placeholder="Digite..." /></div></div>
         <div class="frow"><div class="ffield full"><label>Quantidade <span class="tag-ia" id="tag-dest-qtd" style="display:none">IA</span></label><input type="number" id="f-dest-qtd" placeholder="0.00" step="0.01" /></div></div>
       </div>
     </div>
-    <button class="btn-enviar btn-entrega" onclick="enviar('Entrega registrada com sucesso!')"><i class="ti ti-send" style="font-size:17px"></i> Enviar entrega</button>
+    <div class="erro-box" id="erro-entrega"></div>
+    <button class="btn-enviar btn-entrega" id="btn-enviar-entrega" onclick="enviarEntrega()"><i class="ti ti-send" style="font-size:17px"></i> Enviar entrega</button>
     <div class="lock-note"><i class="ti ti-lock" style="font-size:13px"></i> Após enviar, o registro fica bloqueado</div>
   </div>
 </div>
@@ -277,7 +271,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
         <div class="total-box"><span class="tl">Total do abastecimento</span><span class="tv" id="abast-total">R$ —</span></div>
       </div>
     </div>
-    <button class="btn-enviar btn-abast" onclick="enviar('Abastecimento registrado!')"><i class="ti ti-send" style="font-size:17px"></i> Registrar abastecimento</button>
+    <div class="erro-box" id="erro-abast"></div>
+    <button class="btn-enviar btn-abast" id="btn-enviar-abast" onclick="enviarAbast()"><i class="ti ti-send" style="font-size:17px"></i> Registrar abastecimento</button>
     <div class="lock-note"><i class="ti ti-lock" style="font-size:13px"></i> Após enviar, o registro fica bloqueado</div>
   </div>
 </div>
@@ -323,8 +318,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
             </select></div></div>
           <div class="frow"><div class="ffield full"><label>Descrição <span class="tag-ia" id="tag-manut-desc" style="display:none">IA</span></label><textarea id="f-manut-desc" rows="3" placeholder="Descreva o que aconteceu..."></textarea></div></div>
           <div class="frow">
-            <div class="ffield"><label>KM atual</label><input type="number" placeholder="Ex: 125000" /></div>
-            <div class="ffield"><label>Urgência</label><select><option value="">Selecione...</option><option>🟢 Baixa</option><option>🟡 Média</option><option>🔴 Alta</option></select></div>
+            <div class="ffield"><label>KM atual</label><input type="number" id="f-mn-km" placeholder="Ex: 125000" /></div>
+            <div class="ffield"><label>Urgência</label><select id="f-mn-urgencia"><option value="">Selecione...</option><option>🟢 Baixa</option><option>🟡 Média</option><option>🔴 Alta</option></select></div>
           </div>
         </div>
       </div>
@@ -356,22 +351,24 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
         </div>
       </div>
     </div>
-    <button class="btn-enviar btn-manut" onclick="enviar('Ocorrência registrada!')"><i class="ti ti-send" style="font-size:17px"></i> Registrar ocorrência</button>
+    <div class="erro-box" id="erro-manut"></div>
+    <button class="btn-enviar btn-manut" id="btn-enviar-manut" onclick="enviarManut()"><i class="ti ti-send" style="font-size:17px"></i> Registrar ocorrência</button>
     <div class="lock-note"><i class="ti ti-lock" style="font-size:13px"></i> Após enviar, o registro fica bloqueado</div>
   </div>
 </div>
 
-<!-- Overlay sucesso -->
 <div class="success-overlay" id="success-overlay">
   <div class="success-box">
     <i class="ti ti-circle-check"></i>
     <h3 id="success-title">Registrado!</h3>
-    <p id="success-msg">Dados enviados e bloqueados com sucesso.</p>
+    <p id="success-msg">Dados enviados com sucesso.</p>
     <button onclick="fecharSucesso()">OK</button>
   </div>
 </div>
 
 <script>
+const API = 'http://localhost:3000';
+
 function iniciar() {
   const d = new Date();
   const data = d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
@@ -433,10 +430,7 @@ function setModoKm(modo){
   document.getElementById('km-btn-manual').classList.toggle('ativo',modo==='manual');
   if(modo==='manual') document.getElementById('km-campos').style.display='flex';
 }
-
-function abrirCamera(tipo) {
-  document.getElementById('file-'+tipo).click();
-}
+function abrirCamera(tipo) { document.getElementById('file-'+tipo).click(); }
 
 const lido={orig:false,dest:false};
 function processarImagem(tipo, input) {
@@ -449,7 +443,6 @@ function processarImagem(tipo, input) {
     lido[tipo]=true;
   });
 }
-
 function rodarUpload(areaId,fillId,iconId,labelId,msgLoad,msgDone,cb){
   const area=document.getElementById(areaId),fill=document.getElementById(fillId),icon=document.getElementById(iconId),label=document.getElementById(labelId);
   if(!area) return;
@@ -458,13 +451,88 @@ function rodarUpload(areaId,fillId,iconId,labelId,msgLoad,msgDone,cb){
   setTimeout(()=>{ clearInterval(iv); fill.style.width='100%'; setTimeout(()=>{ area.classList.remove('loading'); area.classList.add('done'); icon.className='ti ti-circle-check'; label.textContent=msgDone; cb(); },200); },1800);
 }
 
-function enviar(msg) {
-  document.getElementById('success-title').textContent = msg;
-  document.getElementById('success-overlay').classList.add('show');
+function mostrarErro(id, msg){ const el=document.getElementById(id); el.textContent=msg; el.style.display='block'; setTimeout(()=>el.style.display='none',4000); }
+function setLoading(id, loading){ const btn=document.getElementById(id); btn.disabled=loading; btn.innerHTML=loading?'<i class="ti ti-loader-2"></i> Enviando...':`<i class="ti ti-send"></i> ${btn.dataset.label||'Enviar'}`; }
+
+async function enviarEntrega() {
+  const placa = document.getElementById('e-placa').value.trim();
+  if(!placa) { mostrarErro('erro-entrega','Informe a placa do veículo.'); return; }
+  const btn = document.getElementById('btn-enviar-entrega');
+  btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2"></i> Enviando...';
+  const dados = {
+    motorista: localStorage.getItem('mb_motorista') || 'Motorista',
+    placa,
+    data: document.getElementById('e-data').value,
+    hora: document.getElementById('e-hora').value,
+    local_coleta: document.getElementById('f-orig-local').value,
+    local_destino: document.getElementById('f-dest-local').value,
+    produto: document.getElementById('f-orig-prod').value,
+    quantidade: document.getElementById('f-orig-qtd').value,
+    doc_coleta: document.getElementById('f-orig-ndoc').value,
+    doc_destino: document.getElementById('f-dest-ndoc').value,
+  };
+  try {
+    const res = await fetch(API+'/entregas', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(dados) });
+    const json = await res.json();
+    if(res.ok){ document.getElementById('success-title').textContent='Entrega registrada!'; document.getElementById('success-overlay').classList.add('show'); }
+    else { mostrarErro('erro-entrega', json.erro || 'Erro ao enviar.'); }
+  } catch(e) { mostrarErro('erro-entrega','Não foi possível conectar ao servidor. Verifique se ele está rodando.'); }
+  btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Enviar entrega';
 }
-function fecharSucesso() {
-  document.getElementById('success-overlay').classList.remove('show');
+
+async function enviarAbast() {
+  const placa = document.getElementById('ab-placa').value.trim();
+  if(!placa) { mostrarErro('erro-abast','Informe a placa do veículo.'); return; }
+  const btn = document.getElementById('btn-enviar-abast');
+  btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2"></i> Enviando...';
+  const l=parseFloat(document.getElementById('f-abast-litros').value)||0;
+  const p=parseFloat(document.getElementById('f-abast-preco').value)||0;
+  const dados = {
+    motorista: localStorage.getItem('mb_motorista') || 'Motorista',
+    placa,
+    data: document.getElementById('ab-data').value,
+    hora: document.getElementById('ab-hora').value,
+    posto: document.getElementById('f-abast-posto').value,
+    combustivel: document.getElementById('f-abast-comb').value,
+    litros: document.getElementById('f-abast-litros').value,
+    preco_litro: document.getElementById('f-abast-preco').value,
+    km_atual: document.getElementById('f-abast-km').value,
+    total: (l*p).toFixed(2),
+  };
+  try {
+    const res = await fetch(API+'/abastecimentos', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(dados) });
+    const json = await res.json();
+    if(res.ok){ document.getElementById('success-title').textContent='Abastecimento registrado!'; document.getElementById('success-overlay').classList.add('show'); }
+    else { mostrarErro('erro-abast', json.erro || 'Erro ao enviar.'); }
+  } catch(e) { mostrarErro('erro-abast','Não foi possível conectar ao servidor.'); }
+  btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Registrar abastecimento';
 }
+
+async function enviarManut() {
+  const placa = document.getElementById('mn-placa').value.trim();
+  if(!placa) { mostrarErro('erro-manut','Informe a placa do veículo.'); return; }
+  const btn = document.getElementById('btn-enviar-manut');
+  btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2"></i> Enviando...';
+  const dados = {
+    motorista: localStorage.getItem('mb_motorista') || 'Motorista',
+    placa,
+    data: document.getElementById('mn-data').value,
+    hora: document.getElementById('mn-hora').value,
+    tipo: document.getElementById('f-manut-tipo').value,
+    descricao: document.getElementById('f-manut-desc').value,
+    urgencia: document.getElementById('f-mn-urgencia').value,
+    km_atual: document.getElementById('f-mn-km').value,
+  };
+  try {
+    const res = await fetch(API+'/ocorrencias', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(dados) });
+    const json = await res.json();
+    if(res.ok){ document.getElementById('success-title').textContent='Ocorrência registrada!'; document.getElementById('success-overlay').classList.add('show'); }
+    else { mostrarErro('erro-manut', json.erro || 'Erro ao enviar.'); }
+  } catch(e) { mostrarErro('erro-manut','Não foi possível conectar ao servidor.'); }
+  btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Registrar ocorrência';
+}
+
+function fecharSucesso() { document.getElementById('success-overlay').classList.remove('show'); }
 </script>
 </body>
 </html>
