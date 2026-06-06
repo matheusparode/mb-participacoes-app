@@ -978,6 +978,8 @@ async function enviarEntrega() {
     local_destino: destino,
     produto: prod === 'outro' ? prodOutro : prod,
     quantidade: qtd,
+    quantidade_coleta: qtd,
+    quantidade_destino: document.getElementById('f-dest-qtd').value.trim() || qtd,
     doc_coleta: docColeta,
     doc_destino: docDestino,
   };
