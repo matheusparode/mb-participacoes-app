@@ -161,6 +161,23 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .btn-manut { background: #7B3A10; }
 .lock-note { font-size: 12px; color: #999; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 4px 0 8px; }
 
+/* ── Autocomplete ──────────────────────────────── */
+.ac-wrap { position: relative; width: 100%; }
+.ac-list {
+  position: absolute; top: 100%; left: 0; right: 0;
+  background: #fff; border: 1px solid #ccc;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.13);
+  z-index: 200; max-height: 240px; overflow-y: auto; display: none;
+}
+.ac-item {
+  padding: 11px 14px; cursor: pointer; font-size: 0.9rem; color: #333;
+  border-bottom: 1px solid #f5f5f5;
+}
+.ac-item:last-child { border-bottom: none; border-radius: 0 0 10px 10px; }
+.ac-item:active { background: #eef2ff; }
+.ac-item.ac-outro { color: #888; font-style: italic; background: #fafafa; }
+
 /* Banner de confirmação IA */
 .ia-review-banner {
   background: #fffbe6;
@@ -299,7 +316,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       </div>
 
       <div class="campos-doc" id="orig-campos" style="display:flex">
-        <div class="frow"><div class="ffield full"><label>Local de coleta</label><input type="text" id="f-orig-local" placeholder="Endereço de coleta" /></div></div>
+        <div class="frow"><div class="ffield full"><label>Local de coleta</label><input type="text" id="f-orig-local" placeholder="Digite ou selecione o local..." autocomplete="off" /></div></div>
         <div class="frow">
           <div class="ffield"><label>Tipo de documento</label><select id="sel-orig-tipo"><option value="">Selecione...</option><option value="nf">Nota fiscal</option><option value="romaneio">Romaneio</option></select></div>
           <div class="ffield"><label>Nº documento</label><input type="text" id="f-orig-ndoc" placeholder="Número" /></div>
@@ -327,7 +344,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
         <div id="status-foto-dest" style="display:none;font-size:12px;margin-top:6px;text-align:center;"></div>
       </div>
       <div class="campos-doc" id="dest-campos" style="display:flex">
-        <div class="frow"><div class="ffield full"><label>Local de destino</label><input type="text" id="f-dest-local" placeholder="Endereço de destino" /></div></div>
+        <div class="frow"><div class="ffield full"><label>Local de destino</label><input type="text" id="f-dest-local" placeholder="Digite ou selecione o cliente..." autocomplete="off" /></div></div>
         <div class="frow">
           <div class="ffield"><label>Tipo de documento</label><select id="sel-dest-tipo"><option value="">Selecione...</option><option value="nf">Nota fiscal</option><option value="romaneio">Romaneio</option></select></div>
           <div class="ffield"><label>Nº documento</label><input type="text" id="f-dest-ndoc" placeholder="Número" /></div>
@@ -940,6 +957,84 @@ async function enviarManut() {
 }
 
 function fecharSucesso() { document.getElementById('success-overlay').classList.remove('show'); }
+
+// ── Autocomplete de locais ──────────────────────
+const LOCAIS_COLETA = [
+  'JAZIDA SÃO JOSE',
+  'MB AREIAS',
+  'MINERAÇÃO PEIXOTO',
+  'PEDRACON PORTO ALEGRE',
+  'MINERAÇÃO VERA CRUZ (MONTE NEGRO)',
+  'MINERAÇÃO VERA CRUZ (CAMPO BOM)',
+  'JAZIDA IRMÃOS',
+  'JAZIDA MONTE BLANCO',
+  'SULMIN'
+];
+
+const CLIENTES_DESTINO = [
+  'ALCARÁ','BAROTTI','BN','BRASCOFER','CAÇULA','CALDRE','CASA NOVA',
+  'CASAROLLI','CONCEIÇÃO','CURCEL','DAUGE','DEPAULI','DESTAK','DUARTE',
+  'FERRAJAO','FIGUEIREDO','FRANZOI','GARDAS (MC MAT)','GUARIENTI','JUMBO',
+  'LIMA','MAD CENTER','MADEKASA (DK)','MADEVATTI','MB AREIAS','OBRA',
+  'PETTER','RIGONI','RENOVA','SÃO JOAO','SÃO JORGE','SÃO VICENTE',
+  'VIRTUAL (OLMIRO)','VIVIAN'
+];
+
+function criarAutocomplete(inputId, opcoes) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+
+  // Cria wrapper
+  const wrap = document.createElement('div');
+  wrap.className = 'ac-wrap';
+  input.parentNode.insertBefore(wrap, input);
+  wrap.appendChild(input);
+
+  // Cria dropdown
+  const list = document.createElement('div');
+  list.className = 'ac-list';
+  list.id = inputId + '-aclist';
+  wrap.appendChild(list);
+
+  function mostrar(filtro) {
+    const f = (filtro || '').toUpperCase().trim();
+    const matches = f
+      ? opcoes.filter(o => o.toUpperCase().includes(f))
+      : opcoes;
+
+    list.innerHTML = matches.map(o =>
+      `<div class="ac-item" onmousedown="selecionarAC('${inputId}','${o.replace(/'/g,"\\'")}')">${o}</div>`
+    ).join('') +
+    `<div class="ac-item ac-outro" onmousedown="selecionarAC('${inputId}','__outro__')">✏️ Outro (digitar manualmente)</div>`;
+
+    list.style.display = 'block';
+  }
+
+  function esconder() {
+    list.style.display = 'none';
+  }
+
+  input.addEventListener('focus', () => mostrar(input.value));
+  input.addEventListener('input', () => mostrar(input.value));
+  input.addEventListener('blur', () => setTimeout(esconder, 200));
+}
+
+function selecionarAC(inputId, valor) {
+  const input = document.getElementById(inputId);
+  const list = document.getElementById(inputId + '-aclist');
+  if (valor === '__outro__') {
+    input.value = '';
+    input.placeholder = 'Digite o local/cliente...';
+    input.focus();
+  } else {
+    input.value = valor;
+  }
+  if (list) list.style.display = 'none';
+}
+
+// Inicializa os campos de autocomplete
+criarAutocomplete('f-orig-local', LOCAIS_COLETA);
+criarAutocomplete('f-dest-local', CLIENTES_DESTINO);
 </script>
 </body>
 </html>
