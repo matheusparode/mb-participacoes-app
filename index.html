@@ -321,8 +321,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <div class="campos-doc" id="orig-campos" style="display:flex">
         <div class="frow"><div class="ffield full"><label>Local de coleta</label><input type="text" id="f-orig-local" placeholder="Digite ou selecione o local..." autocomplete="off" /></div></div>
         <div class="frow">
-          <div class="ffield"><label>Tipo de documento</label><select id="sel-orig-tipo"><option value="">Selecione...</option><option value="nf">Nota fiscal</option><option value="romaneio">Romaneio</option></select></div>
-          <div class="ffield"><label>Nº documento</label><input type="text" id="f-orig-ndoc" placeholder="Número" /></div>
+          <div class="ffield"><label>Tipo de documento</label>
+            <select id="sel-orig-tipo" onchange="onTipoDoc('orig')">
+              <option value="">Selecione...</option>
+              <option value="nf">Nota fiscal</option>
+              <option value="romaneio">Romaneio</option>
+              <option value="sem_nota">Sem nota/Romaneio</option>
+            </select>
+          </div>
+          <div class="ffield" id="orig-ndoc-wrap">
+            <label>Nº documento</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input type="text" id="f-orig-ndoc" placeholder="Número" style="flex:1" />
+              <button type="button" onclick="semNumero('orig')" style="white-space:nowrap;padding:6px 8px;border:1px solid #ccc;border-radius:6px;background:#f5f5f5;font-size:0.78rem;cursor:pointer;color:#555;">S/N</button>
+            </div>
+          </div>
         </div>
         <div class="frow"><div class="ffield full"><label>Produto</label>
           <select id="f-orig-prod" onchange="toggleOutro('orig',this.value)">
@@ -349,8 +362,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <div class="campos-doc" id="dest-campos" style="display:flex">
         <div class="frow"><div class="ffield full"><label>Local de destino</label><input type="text" id="f-dest-local" placeholder="Digite ou selecione o cliente..." autocomplete="off" /></div></div>
         <div class="frow">
-          <div class="ffield"><label>Tipo de documento</label><select id="sel-dest-tipo"><option value="">Selecione...</option><option value="nf">Nota fiscal</option><option value="romaneio">Romaneio</option></select></div>
-          <div class="ffield"><label>Nº documento</label><input type="text" id="f-dest-ndoc" placeholder="Número" /></div>
+          <div class="ffield"><label>Tipo de documento</label>
+            <select id="sel-dest-tipo" onchange="onTipoDoc('dest')">
+              <option value="">Selecione...</option>
+              <option value="nf">Nota fiscal</option>
+              <option value="romaneio">Romaneio</option>
+              <option value="sem_nota">Sem nota/Romaneio</option>
+            </select>
+          </div>
+          <div class="ffield" id="dest-ndoc-wrap">
+            <label>Nº documento</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input type="text" id="f-dest-ndoc" placeholder="Número" style="flex:1" />
+              <button type="button" onclick="semNumero('dest')" style="white-space:nowrap;padding:6px 8px;border:1px solid #ccc;border-radius:6px;background:#f5f5f5;font-size:0.78rem;cursor:pointer;color:#555;">S/N</button>
+            </div>
+          </div>
         </div>
         <div class="frow"><div class="ffield full"><label>Produto</label>
           <select id="f-dest-prod" onchange="toggleOutro('dest',this.value)">
@@ -612,6 +638,21 @@ function setModo(lado,modo){
   else if(!lido[lado]) document.getElementById(lado+'-campos').style.display='none';
 }
 // setModoAbast e setModoManut removidos — agora sempre manual com botão de foto separado
+
+function onTipoDoc(lado) {
+  const tipo = document.getElementById('sel-' + lado + '-tipo').value;
+  const wrap = document.getElementById(lado + '-ndoc-wrap');
+  if (wrap) wrap.style.display = tipo === 'sem_nota' ? 'none' : '';
+  if (tipo !== 'sem_nota') {
+    const ndoc = document.getElementById('f-' + lado + '-ndoc');
+    if (ndoc) ndoc.value = '';
+  }
+}
+
+function semNumero(lado) {
+  const el = document.getElementById('f-' + lado + '-ndoc');
+  if (el) el.value = 'S/N';
+}
 function setModoKm(modo){
   document.getElementById('km-modo-foto').style.display=modo==='foto'?'block':'none';
   document.getElementById('km-modo-manual').style.display=modo==='manual'?'block':'none';
@@ -891,23 +932,49 @@ function confirmarDadosIA() {
 function mostrarErro(id, msg){ const el=document.getElementById(id); el.textContent=msg; el.style.display='block'; setTimeout(()=>el.style.display='none',4000); }
 
 async function enviarEntrega() {
-  const placa = document.getElementById('e-placa').value.trim();
+  const placa     = document.getElementById('e-placa').value.trim();
   const motorista = document.getElementById('e-motorista').value.trim();
-  if(!placa) { mostrarErro('erro-entrega','Informe a placa do veículo.'); return; }
-  if(!motorista) { mostrarErro('erro-entrega','Informe o motorista.'); return; }
+  const coleta    = document.getElementById('f-orig-local').value.trim();
+  const destino   = document.getElementById('f-dest-local').value.trim();
+  const tipoOrig  = document.getElementById('sel-orig-tipo').value;
+  const ndocOrig  = document.getElementById('f-orig-ndoc').value.trim();
+  const tipoDest  = document.getElementById('sel-dest-tipo').value;
+  const ndocDest  = document.getElementById('f-dest-ndoc').value.trim();
+  const prod      = document.getElementById('f-orig-prod').value;
+  const prodOutro = document.getElementById('f-orig-outro').value.trim();
+  const qtd       = document.getElementById('f-orig-qtd').value.trim();
+
+  if (!placa)     { mostrarErro('erro-entrega','Informe a placa do veículo.'); return; }
+  if (!motorista) { mostrarErro('erro-entrega','Informe o motorista.'); return; }
+  if (!coleta)    { mostrarErro('erro-entrega','Informe o local de coleta.'); return; }
+  if (!tipoOrig)  { mostrarErro('erro-entrega','Selecione o tipo de documento da coleta.'); return; }
+  if (tipoOrig !== 'sem_nota' && !ndocOrig) { mostrarErro('erro-entrega','Informe o nº do documento de coleta (ou clique S/N).'); return; }
+  if (!prod)      { mostrarErro('erro-entrega','Selecione o produto.'); return; }
+  if (prod === 'outro' && !prodOutro) { mostrarErro('erro-entrega','Descreva o produto.'); return; }
+  if (!qtd)       { mostrarErro('erro-entrega','Informe a quantidade.'); return; }
+  if (!destino)   { mostrarErro('erro-entrega','Informe o local de destino.'); return; }
+  if (!tipoDest)  { mostrarErro('erro-entrega','Selecione o tipo de documento do destino.'); return; }
+  if (tipoDest !== 'sem_nota' && !ndocDest) { mostrarErro('erro-entrega','Informe o nº do documento de destino (ou clique S/N).'); return; }
+
   const btn = document.getElementById('btn-enviar-entrega');
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2"></i> Enviando...';
+
+  // Monta label do doc
+  const labelTipo = { nf:'NF', romaneio:'ROM', sem_nota:'Sem nota/Romaneio' };
+  const docColeta = tipoOrig === 'sem_nota' ? 'Sem nota/Romaneio' : `${labelTipo[tipoOrig]||tipoOrig} ${ndocOrig}`;
+  const docDestino = tipoDest === 'sem_nota' ? 'Sem nota/Romaneio' : `${labelTipo[tipoDest]||tipoDest} ${ndocDest}`;
+
   const dados = {
     motorista,
     placa,
     data: document.getElementById('e-data').value,
     hora: document.getElementById('e-hora').value,
-    local_coleta: document.getElementById('f-orig-local').value,
-    local_destino: document.getElementById('f-dest-local').value,
-    produto: document.getElementById('f-orig-prod').value,
-    quantidade: document.getElementById('f-orig-qtd').value,
-    doc_coleta: document.getElementById('f-orig-ndoc').value,
-    doc_destino: document.getElementById('f-dest-ndoc').value,
+    local_coleta: coleta,
+    local_destino: destino,
+    produto: prod === 'outro' ? prodOutro : prod,
+    quantidade: qtd,
+    doc_coleta: docColeta,
+    doc_destino: docDestino,
   };
   try {
     const res = await fetch(API+'/entregas', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(dados) });
@@ -1002,7 +1069,7 @@ const PLACAS = [
 ];
 
 const LOCAIS_COLETA = [
-  'Jazida São Jose',
+  'Jazida São José',
   'Mb Areias',
   'Mineração Peixoto',
   'Pedracon (Porto Alegre)',
@@ -1095,14 +1162,21 @@ if (_motSalvo) {
 
 // ── Reset de formulário após envio ───────────────
 function resetarEntrega() {
-  ['f-orig-local','f-orig-ndoc','f-orig-prod','f-orig-qtd',
-   'f-dest-local','f-dest-ndoc','f-dest-prod','f-dest-qtd'].forEach(id => {
+  ['f-orig-local','f-orig-ndoc','f-orig-outro','f-orig-qtd',
+   'f-dest-local','f-dest-ndoc','f-dest-outro','f-dest-qtd'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
-  ['sel-orig-tipo','sel-dest-tipo'].forEach(id => {
+  ['sel-orig-tipo','sel-dest-tipo','f-orig-prod','f-dest-prod'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.selectedIndex = 0;
+  });
+  // Restaura visibilidade do campo de número
+  ['orig','dest'].forEach(l => {
+    const wrap = document.getElementById(l + '-ndoc-wrap');
+    if (wrap) wrap.style.display = '';
+    const outro = document.getElementById(l + '-outro-wrap');
+    if (outro) outro.style.display = 'none';
   });
   // Reset botões de foto
   ['orig','dest'].forEach(t => {
