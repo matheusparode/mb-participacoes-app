@@ -366,31 +366,25 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     </div>
     <div class="fcard abast">
       <div class="fcard-title"><i class="ti ti-gas-station"></i> Abastecimento</div>
-      <div class="modo-toggle">
-        <button class="modo-btn ativo" id="abast-btn-foto" onclick="setModoAbast('foto')"><i class="ti ti-camera" style="font-size:15px"></i> Fotografar cupom</button>
-        <button class="modo-btn" id="abast-btn-manual" onclick="setModoAbast('manual')"><i class="ti ti-pencil" style="font-size:15px"></i> Manual</button>
+      <div style="margin-bottom:12px;">
+        <button type="button" id="btn-foto-abast" onclick="document.getElementById('file-foto-abast').click()"
+          style="width:100%;padding:10px;border:2px dashed #90CAF9;border-radius:8px;background:#f0f6ff;color:#1565C0;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <i class="ti ti-camera" style="font-size:18px"></i> Fotografar cupom do posto
+        </button>
+        <input type="file" id="file-foto-abast" accept="image/*" capture="environment" style="display:none" onchange="enviarFoto('abast', 'abastecimentos', this)">
+        <div id="status-foto-abast" style="display:none;font-size:12px;margin-top:6px;text-align:center;"></div>
       </div>
-      <div id="abast-modo-foto">
-        <div class="upload-area" id="upload-abast" onclick="abrirCamera('abast')">
-          <div class="upload-icon"><i class="ti ti-camera" id="icon-abast"></i></div>
-          <div class="upload-label" id="label-abast">Fotografar cupom fiscal do posto</div>
-          <div class="progress-bar"><div class="progress-fill" id="fill-abast"></div></div>
-          <div class="ai-badge"><i class="ti ti-sparkles" style="font-size:12px"></i> Lido pela IA</div>
-        </div>
-        <input type="file" id="file-abast" accept="image/*" capture="environment" style="display:none" onchange="processarImagem('abast', this)">
-      </div>
-      <div id="abast-modo-manual" style="display:none"><div class="manual-note"><i class="ti ti-info-circle" style="font-size:16px"></i> Preencha os dados manualmente</div></div>
-      <div class="campos-doc" id="abast-campos" style="display:none">
-        <div class="frow"><div class="ffield full"><label>Nome do posto <span class="tag-ia" id="tag-abast-posto" style="display:none">IA</span></label><input type="text" id="f-abast-posto" placeholder="Ex: Posto Shell Av. Brasil" /></div></div>
+      <div class="campos-doc" id="abast-campos" style="display:flex">
+        <div class="frow"><div class="ffield full"><label>Nome do posto</label><input type="text" id="f-abast-posto" placeholder="Ex: Posto Shell Av. Brasil" /></div></div>
         <div class="frow">
-          <div class="ffield"><label>Combustível <span class="tag-ia" id="tag-abast-comb" style="display:none">IA</span></label>
+          <div class="ffield"><label>Combustível</label>
             <select id="f-abast-comb"><option value="">Selecione...</option><option>Diesel S10</option><option>Diesel Comum</option><option>Gasolina</option><option>Etanol</option><option>Arla 32</option></select>
           </div>
-          <div class="ffield"><label>Litros <span class="tag-ia" id="tag-abast-litros" style="display:none">IA</span></label><input type="number" id="f-abast-litros" placeholder="0.00" step="0.01" onchange="calcTotal()" onkeyup="calcTotal()" /></div>
+          <div class="ffield"><label>Litros</label><input type="number" id="f-abast-litros" placeholder="0.00" step="0.01" onchange="calcTotal()" onkeyup="calcTotal()" /></div>
         </div>
         <div class="frow">
-          <div class="ffield"><label>Preço/litro <span class="tag-ia" id="tag-abast-preco" style="display:none">IA</span></label><input type="number" id="f-abast-preco" placeholder="R$ 0,00" step="0.01" onchange="calcTotal()" onkeyup="calcTotal()" /></div>
-          <div class="ffield"><label>KM atual <span class="tag-ia" id="tag-abast-km" style="display:none">IA</span></label><input type="number" id="f-abast-km" placeholder="Ex: 125000" /></div>
+          <div class="ffield"><label>Preço/litro</label><input type="number" id="f-abast-preco" placeholder="R$ 0,00" step="0.01" onchange="calcTotal()" onkeyup="calcTotal()" /></div>
+          <div class="ffield"><label>KM atual</label><input type="number" id="f-abast-km" placeholder="Ex: 125000" /></div>
         </div>
         <div class="total-box"><span class="tl">Total do abastecimento</span><span class="tv" id="abast-total">R$ —</span></div>
       </div>
@@ -419,28 +413,22 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <div class="fcard-title"><i class="ti ti-tool"></i> Observações e manutenção</div>
       <label class="sem-ocorrencia"><input type="checkbox" onchange="toggleSem(this.checked)" /> Sem ocorrências no veículo</label>
       <div id="manut-conteudo" style="margin-top:12px">
-        <div class="modo-toggle">
-          <button class="modo-btn ativo" id="manut-btn-foto" onclick="setModoManut('foto')"><i class="ti ti-camera" style="font-size:15px"></i> Fotografar</button>
-          <button class="modo-btn" id="manut-btn-manual" onclick="setModoManut('manual')"><i class="ti ti-pencil" style="font-size:15px"></i> Descrever</button>
+        <div style="margin-bottom:12px;">
+          <button type="button" id="btn-foto-manut" onclick="document.getElementById('file-foto-manut').click()"
+            style="width:100%;padding:10px;border:2px dashed #F5C6A0;border-radius:8px;background:#fff8f4;color:#7B3A10;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <i class="ti ti-camera" style="font-size:18px"></i> Fotografar problema / manutenção
+          </button>
+          <input type="file" id="file-foto-manut" accept="image/*" capture="environment" style="display:none" onchange="enviarFoto('manut', 'manutencoes', this)">
+          <div id="status-foto-manut" style="display:none;font-size:12px;margin-top:6px;text-align:center;"></div>
         </div>
-        <div id="manut-modo-foto">
-          <div class="upload-area" id="upload-manut" onclick="abrirCamera('manut')">
-            <div class="upload-icon"><i class="ti ti-camera" id="icon-manut"></i></div>
-            <div class="upload-label" id="label-manut">Fotografar problema / manutenção</div>
-            <div class="progress-bar"><div class="progress-fill" id="fill-manut"></div></div>
-            <div class="ai-badge"><i class="ti ti-sparkles" style="font-size:12px"></i> Descrição gerada pela IA</div>
-          </div>
-          <input type="file" id="file-manut" accept="image/*" capture="environment" style="display:none" onchange="processarImagem('manut', this)">
-        </div>
-        <div id="manut-modo-manual" style="display:none"><div class="manual-note"><i class="ti ti-info-circle" style="font-size:16px"></i> Descreva o problema ou manutenção</div></div>
-        <div class="campos-doc" id="manut-campos" style="display:none">
-          <div class="frow"><div class="ffield full"><label>Tipo de ocorrência <span class="tag-ia" id="tag-manut-tipo" style="display:none">IA</span></label>
+        <div class="campos-doc" id="manut-campos" style="display:flex">
+          <div class="frow"><div class="ffield full"><label>Tipo de ocorrência</label>
             <select id="f-manut-tipo"><option value="">Selecione...</option>
               <optgroup label="Manutenção"><option>Troca de óleo</option><option>Troca de pneu</option><option>Freios</option><option>Motor</option><option>Suspensão</option><option>Elétrica</option><option>Revisão geral</option></optgroup>
               <optgroup label="Ocorrência"><option>Avaria na carroceria</option><option>Acidente</option><option>Pane mecânica</option><option>Multa de trânsito</option></optgroup>
               <optgroup label="Outro"><option value="outro-manut">Outro (descrever)</option></optgroup>
             </select></div></div>
-          <div class="frow"><div class="ffield full"><label>Descrição <span class="tag-ia" id="tag-manut-desc" style="display:none">IA</span></label><textarea id="f-manut-desc" rows="3" placeholder="Descreva o que aconteceu..."></textarea></div></div>
+          <div class="frow"><div class="ffield full"><label>Descrição</label><textarea id="f-manut-desc" rows="3" placeholder="Descreva o que aconteceu..."></textarea></div></div>
           <div class="frow">
             <div class="ffield"><label>KM atual</label><input type="number" id="f-mn-km" placeholder="Ex: 125000" /></div>
             <div class="ffield"><label>Urgência</label><select id="f-mn-urgencia"><option value="">Selecione...</option><option>🟢 Baixa</option><option>🟡 Média</option><option>🔴 Alta</option></select></div>
@@ -597,20 +585,7 @@ function setModo(lado,modo){
   if(modo==='manual') document.getElementById(lado+'-campos').style.display='flex';
   else if(!lido[lado]) document.getElementById(lado+'-campos').style.display='none';
 }
-function setModoAbast(modo){
-  document.getElementById('abast-modo-foto').style.display=modo==='foto'?'block':'none';
-  document.getElementById('abast-modo-manual').style.display=modo==='manual'?'block':'none';
-  document.getElementById('abast-btn-foto').classList.toggle('ativo',modo==='foto');
-  document.getElementById('abast-btn-manual').classList.toggle('ativo',modo==='manual');
-  if(modo==='manual') document.getElementById('abast-campos').style.display='flex';
-}
-function setModoManut(modo){
-  document.getElementById('manut-modo-foto').style.display=modo==='foto'?'block':'none';
-  document.getElementById('manut-modo-manual').style.display=modo==='manual'?'block':'none';
-  document.getElementById('manut-btn-foto').classList.toggle('ativo',modo==='foto');
-  document.getElementById('manut-btn-manual').classList.toggle('ativo',modo==='manual');
-  if(modo==='manual') document.getElementById('manut-campos').style.display='flex';
-}
+// setModoAbast e setModoManut removidos — agora sempre manual com botão de foto separado
 function setModoKm(modo){
   document.getElementById('km-modo-foto').style.display=modo==='foto'?'block':'none';
   document.getElementById('km-modo-manual').style.display=modo==='manual'?'block':'none';
@@ -621,20 +596,33 @@ function setModoKm(modo){
 function abrirCamera(tipo) { document.getElementById('file-'+tipo).click(); }
 
 // ── Foto da nota por placa ────────────────────────
-async function enviarFotoNota(tipo, input) {
+// Função genérica de envio de foto (usada por coleta, destino, abastecimento e manutenção)
+async function enviarFoto(tipo, subpasta, input) {
   if (!input.files || !input.files[0]) return;
   const file = input.files[0];
-  const placa = document.getElementById('e-placa').value.trim();
+
+  // Determina placa e campos de erro conforme aba
+  let placaId, erroId, labelOriginal;
+  if (tipo === 'orig' || tipo === 'dest') {
+    placaId = 'e-placa'; erroId = 'erro-entrega';
+    labelOriginal = tipo === 'orig' ? 'Fotografar nota de coleta' : 'Fotografar nota de destino';
+  } else if (tipo === 'abast') {
+    placaId = 'ab-placa'; erroId = 'erro-abast';
+    labelOriginal = 'Fotografar cupom do posto';
+  } else if (tipo === 'manut') {
+    placaId = 'mn-placa'; erroId = 'erro-manut';
+    labelOriginal = 'Fotografar problema / manutenção';
+  }
+
+  const placa = document.getElementById(placaId).value.trim();
   const statusEl = document.getElementById('status-foto-' + tipo);
   const btnEl = document.getElementById('btn-foto-' + tipo);
 
   if (!placa) {
-    mostrarErro('erro-entrega', 'Informe a placa antes de fotografar.');
+    mostrarErro(erroId, 'Informe a placa antes de fotografar.');
     return;
   }
 
-  // Feedback visual
-  btnEl.style.background = '#edfaf3';
   btnEl.innerHTML = '<i class="ti ti-loader-2" style="font-size:18px"></i> Enviando foto...';
   statusEl.style.display = 'block';
   statusEl.style.color = '#888';
@@ -649,29 +637,32 @@ async function enviarFotoNota(tipo, input) {
     });
 
     const motorista = localStorage.getItem('mb_motorista') || '';
+    const body = { imagem: base64, placa, tipo, motorista };
+    if (subpasta) body.subpasta = subpasta;
+
     const resp = await fetch(`${API}/foto`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imagem: base64, placa, tipo, motorista })
+      body: JSON.stringify(body)
     });
     const dados = await resp.json();
-
     if (dados.erro) throw new Error(dados.erro);
 
-    btnEl.style.background = '#edfaf3';
-    btnEl.style.borderColor = '#0d5c2e';
-    btnEl.innerHTML = '<i class="ti ti-circle-check" style="font-size:18px;color:#0d5c2e"></i> Foto salva ✓';
+    btnEl.innerHTML = '<i class="ti ti-circle-check" style="font-size:18px;color:green"></i> Foto salva ✓';
     statusEl.style.color = '#0d5c2e';
     statusEl.textContent = `Salvo em: ${dados.pasta}${dados.arquivo}`;
 
   } catch (err) {
-    btnEl.style.background = '#fff0f0';
-    btnEl.style.borderColor = '#ffaaaa';
-    btnEl.innerHTML = '<i class="ti ti-camera" style="font-size:18px"></i> Fotografar nota de ' + (tipo === 'orig' ? 'coleta' : 'destino');
+    btnEl.innerHTML = '<i class="ti ti-camera" style="font-size:18px"></i> ' + labelOriginal;
     statusEl.style.color = '#c0392b';
     statusEl.textContent = 'Erro ao enviar: ' + err.message;
   }
   input.value = '';
+}
+
+// Atalhos para coleta/destino (mantém compatibilidade)
+function enviarFotoNota(tipo, input) {
+  return enviarFoto(tipo, null, input);
 }
 
 const lido={orig:false,dest:false};
