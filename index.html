@@ -160,6 +160,36 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .btn-abast { background: #1565C0; }
 .btn-manut { background: #7B3A10; }
 .lock-note { font-size: 12px; color: #999; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 4px 0 8px; }
+
+/* Banner de confirmação IA */
+.ia-review-banner {
+  background: #fffbe6;
+  border: 2px solid #f5c842;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+}
+.ia-review-banner.show { display: flex; }
+.ia-review-banner.ok { background: #edfaf3; border-color: #0d5c2e; }
+.ia-review-banner .banner-msg {
+  font-size: 13px; font-weight: 600; color: #7a5c00;
+  display: flex; align-items: center; gap: 8px;
+}
+.ia-review-banner.ok .banner-msg { color: #0d5c2e; }
+.ia-review-banner .btn-confirmar {
+  background: #f5c842; color: #1a1a1a; border: none;
+  border-radius: 10px; padding: 12px; font-size: 14px;
+  font-weight: 700; font-family: inherit; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.2s;
+}
+.ia-review-banner .btn-confirmar:active { transform: scale(0.98); opacity: 0.85; }
+.ia-review-banner.ok .btn-confirmar {
+  background: #0d5c2e; color: #fff; cursor: default;
+  pointer-events: none;
+}
 .success-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
 .success-overlay.show { display: flex; }
 .success-box { background: #fff; border-radius: 16px; padding: 28px 24px; text-align: center; max-width: 280px; width: 100%; }
@@ -320,6 +350,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
         <div class="frow"><div class="ffield full"><label>Quantidade <span class="tag-ia" id="tag-dest-qtd" style="display:none">IA</span></label><input type="number" id="f-dest-qtd" placeholder="0.00" step="0.01" /></div></div>
       </div>
     </div>
+    <!-- Banner de confirmação IA -->
+    <div class="ia-review-banner" id="banner-confirmacao">
+      <div class="banner-msg"><i class="ti ti-alert-circle" style="font-size:18px;color:#f5c842"></i> Verifique os dados preenchidos pela IA antes de enviar!</div>
+      <button class="btn-confirmar" onclick="confirmarDadosIA()">
+        <i class="ti ti-circle-check" style="font-size:17px"></i> OK — Dados conferidos
+      </button>
+    </div>
+
     <div class="erro-box" id="erro-entrega"></div>
     <button class="btn-enviar btn-entrega" id="btn-enviar-entrega" onclick="enviarEntrega()"><i class="ti ti-send" style="font-size:17px"></i> Enviar entrega</button>
     <div class="lock-note"><i class="ti ti-lock" style="font-size:13px"></i> Após enviar, o registro fica bloqueado</div>
@@ -732,6 +770,30 @@ async function processarImagem(tipo, input) {
       area.classList.add('done');
       icon.className = 'ti ti-circle-check';
       label.textContent = '✓ Campos preenchidos pela IA';
+
+      // Troca automaticamente para aba Manual para revisão
+      if (tipo === 'orig' || tipo === 'dest') {
+        setModo(tipo, 'manual');
+      } else if (tipo === 'abast') {
+        setModoAbast('manual');
+      } else if (tipo === 'km') {
+        setModoKm('manual');
+      } else if (tipo === 'manut') {
+        setModoManut('manual');
+      }
+
+      // Mostra banner de confirmação
+      const banner = document.getElementById('banner-confirmacao');
+      if (banner) {
+        banner.classList.remove('ok');
+        banner.classList.add('show');
+        banner.querySelector('.banner-msg').innerHTML =
+          '<i class="ti ti-alert-circle" style="font-size:18px;color:#f5c842"></i> Verifique os dados preenchidos pela IA antes de enviar!';
+        banner.querySelector('.btn-confirmar').innerHTML =
+          '<i class="ti ti-circle-check" style="font-size:17px"></i> OK — Dados conferidos';
+        // Rola até o banner
+        setTimeout(() => banner.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
+      }
     }, 300);
     lido[tipo] = true;
 
@@ -753,6 +815,17 @@ function rodarUpload(areaId,fillId,iconId,labelId,msgLoad,msgDone,cb){
   area.classList.add('loading'); icon.className='ti ti-loader-2'; label.textContent=msgLoad;
   let p=0; const iv=setInterval(()=>{ p+=10; fill.style.width=Math.min(p,92)+'%'; },150);
   setTimeout(()=>{ clearInterval(iv); fill.style.width='100%'; setTimeout(()=>{ area.classList.remove('loading'); area.classList.add('done'); icon.className='ti ti-circle-check'; label.textContent=msgDone; cb(); },200); },1800);
+}
+
+function confirmarDadosIA() {
+  const banner = document.getElementById('banner-confirmacao');
+  if (!banner) return;
+  banner.classList.add('ok');
+  banner.querySelector('.banner-msg').innerHTML =
+    '<i class="ti ti-circle-check" style="font-size:18px;color:#0d5c2e"></i> Dados conferidos pelo motorista ✓';
+  banner.querySelector('.btn-confirmar').innerHTML =
+    '<i class="ti ti-circle-check" style="font-size:17px"></i> Conferido!';
+  setTimeout(() => { banner.classList.remove('show','ok'); }, 2500);
 }
 
 function mostrarErro(id, msg){ const el=document.getElementById(id); el.textContent=msg; el.style.display='block'; setTimeout(()=>el.style.display='none',4000); }
