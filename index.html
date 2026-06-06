@@ -195,6 +195,24 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <i class="ti ti-login" style="font-size:17px"></i> Entrar
     </button>
     <div class="login-hint" id="login-hint">Digite seu nome para continuar.</div>
+    <div style="margin-top:16px;border-top:1px solid #e8e8e8;padding-top:14px;">
+      <div style="font-size:11px;color:#999;text-align:center;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Configurações avançadas</div>
+      <div id="server-config-collapsed" style="text-align:center;">
+        <button onclick="toggleServerConfig()" style="background:transparent;border:1px solid #e0e0e0;border-radius:8px;padding:7px 14px;font-size:12px;color:#888;cursor:pointer;font-family:inherit;">
+          ⚙️ Configurar URL do Servidor
+        </button>
+      </div>
+      <div id="server-config-form" style="display:none;margin-top:8px;">
+        <label style="font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">URL do Servidor (ngrok)</label>
+        <input type="url" id="input-server-url" placeholder="https://xxxx.ngrok-free.app"
+          style="width:100%;border:2px solid #e0e0e0;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;color:#111;background:#fafafa;" />
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button onclick="salvarServerUrl()" style="flex:1;background:#0d5c2e;color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Salvar</button>
+          <button onclick="resetarServerUrl()" style="background:transparent;border:1px solid #ddd;border-radius:8px;padding:10px 12px;font-size:12px;color:#888;cursor:pointer;font-family:inherit;">Reset</button>
+        </div>
+        <div id="server-url-hint" style="font-size:11px;color:#0d5c2e;margin-top:6px;text-align:center;display:none;"></div>
+      </div>
+    </div>
   </div>
 </div>
 <!-- ══════════════════════════════════ -->
@@ -449,7 +467,42 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 </div>
 
 <script>
-const API = 'http://localhost:3000';
+const DEFAULT_API = 'http://localhost:3000';
+let API = localStorage.getItem('mb_server_url') || DEFAULT_API;
+
+function toggleServerConfig() {
+  const form = document.getElementById('server-config-form');
+  const btn = document.getElementById('server-config-collapsed');
+  if (form.style.display === 'none') {
+    form.style.display = 'block';
+    btn.style.display = 'none';
+    document.getElementById('input-server-url').value = API;
+  } else {
+    form.style.display = 'none';
+    btn.style.display = 'block';
+  }
+}
+
+function salvarServerUrl() {
+  const url = document.getElementById('input-server-url').value.trim().replace(/\/$/, '');
+  if (!url) return;
+  API = url;
+  localStorage.setItem('mb_server_url', url);
+  const hint = document.getElementById('server-url-hint');
+  hint.style.display = 'block';
+  hint.textContent = '✓ Servidor configurado: ' + url;
+  setTimeout(() => { hint.style.display = 'none'; }, 3000);
+}
+
+function resetarServerUrl() {
+  API = DEFAULT_API;
+  localStorage.removeItem('mb_server_url');
+  document.getElementById('input-server-url').value = DEFAULT_API;
+  const hint = document.getElementById('server-url-hint');
+  hint.style.display = 'block';
+  hint.textContent = '✓ Restaurado para localhost:3000';
+  setTimeout(() => { hint.style.display = 'none'; }, 2000);
+}
 
 // ── LOGIN ──────────────────────────────
 function fazerLogin() {
