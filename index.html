@@ -287,27 +287,24 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     </div>
     <div class="fcard">
       <div class="fcard-title"><i class="ti ti-package-import"></i> Coleta do material</div>
-      <div class="modo-toggle">
-        <button class="modo-btn ativo" id="orig-btn-foto" onclick="setModo('orig','foto')"><i class="ti ti-camera" style="font-size:15px"></i> Fotografar</button>
-        <button class="modo-btn" id="orig-btn-manual" onclick="setModo('orig','manual')"><i class="ti ti-pencil" style="font-size:15px"></i> Manual</button>
+
+      <!-- Botão de foto da nota de coleta -->
+      <div id="foto-orig-area" style="margin-bottom:12px;">
+        <button type="button" onclick="document.getElementById('file-foto-orig').click()" id="btn-foto-orig"
+          style="width:100%;background:#f5fdf8;border:2px dashed #b2d8c0;border-radius:12px;padding:14px;font-size:13px;color:#1D9E75;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <i class="ti ti-camera" style="font-size:18px"></i> Fotografar nota de coleta
+        </button>
+        <input type="file" id="file-foto-orig" accept="image/*" capture="environment" style="display:none" onchange="enviarFotoNota('orig', this)">
+        <div id="status-foto-orig" style="display:none;font-size:12px;margin-top:6px;text-align:center;"></div>
       </div>
-      <div id="orig-modo-foto">
-        <div class="upload-area" id="upload-orig" onclick="abrirCamera('orig')">
-          <div class="upload-icon"><i class="ti ti-camera" id="icon-orig"></i></div>
-          <div class="upload-label" id="label-orig">Fotografar nota fiscal / romaneio</div>
-          <div class="progress-bar"><div class="progress-fill" id="fill-orig"></div></div>
-          <div class="ai-badge"><i class="ti ti-sparkles" style="font-size:12px"></i> Lido pela IA</div>
-        </div>
-        <input type="file" id="file-orig" accept="image/*" capture="environment" style="display:none" onchange="processarImagem('orig', this)">
-      </div>
-      <div id="orig-modo-manual" style="display:none"><div class="manual-note"><i class="ti ti-info-circle" style="font-size:16px"></i> Preencha manualmente</div></div>
-      <div class="campos-doc" id="orig-campos" style="display:none">
-        <div class="frow"><div class="ffield full"><label>Local de coleta <span class="tag-ia" id="tag-orig-local" style="display:none">IA</span></label><input type="text" id="f-orig-local" placeholder="Endereço de coleta" /></div></div>
+
+      <div class="campos-doc" id="orig-campos" style="display:flex">
+        <div class="frow"><div class="ffield full"><label>Local de coleta</label><input type="text" id="f-orig-local" placeholder="Endereço de coleta" /></div></div>
         <div class="frow">
           <div class="ffield"><label>Tipo de documento</label><select id="sel-orig-tipo"><option value="">Selecione...</option><option value="nf">Nota fiscal</option><option value="romaneio">Romaneio</option></select></div>
-          <div class="ffield"><label>Nº documento <span class="tag-ia" id="tag-orig-ndoc" style="display:none">IA</span></label><input type="text" id="f-orig-ndoc" placeholder="Número" /></div>
+          <div class="ffield"><label>Nº documento</label><input type="text" id="f-orig-ndoc" placeholder="Número" /></div>
         </div>
-        <div class="frow"><div class="ffield full"><label>Produto <span class="tag-ia" id="tag-orig-prod" style="display:none">IA</span></label>
+        <div class="frow"><div class="ffield full"><label>Produto</label>
           <select id="f-orig-prod" onchange="toggleOutro('orig',this.value)">
             <option value="">Selecione o produto...</option>
             <optgroup label="Areias"><option>Areia Media Lavada</option><option>Areia Regular</option><option>Areia Fina</option><option>Areia Media de Rio</option></optgroup>
@@ -315,31 +312,27 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
             <optgroup label="Outro"><option value="outro">Outro (digitar)</option></optgroup>
           </select></div></div>
         <div class="frow" id="orig-outro-wrap" style="display:none"><div class="ffield full"><label>Descreva o produto</label><input type="text" id="f-orig-outro" placeholder="Digite..." /></div></div>
-        <div class="frow"><div class="ffield full"><label>Quantidade (m³ ou sacos) <span class="tag-ia" id="tag-orig-qtd" style="display:none">IA</span></label><input type="number" id="f-orig-qtd" placeholder="0.00" step="0.01" /></div></div>
+        <div class="frow"><div class="ffield full"><label>Quantidade (m³ ou sacos)</label><input type="number" id="f-orig-qtd" placeholder="0.00" step="0.01" /></div></div>
       </div>
       <div class="section-divider"></div>
       <div class="fcard-title" style="margin-top:4px"><i class="ti ti-map-pin-check"></i> Destino do material</div>
-      <div class="modo-toggle">
-        <button class="modo-btn ativo" id="dest-btn-foto" onclick="setModo('dest','foto')"><i class="ti ti-camera" style="font-size:15px"></i> Fotografar</button>
-        <button class="modo-btn" id="dest-btn-manual" onclick="setModo('dest','manual')"><i class="ti ti-pencil" style="font-size:15px"></i> Manual</button>
+
+      <!-- Botão de foto da nota de destino -->
+      <div id="foto-dest-area" style="margin-bottom:12px;">
+        <button type="button" onclick="document.getElementById('file-foto-dest').click()" id="btn-foto-dest"
+          style="width:100%;background:#f5fdf8;border:2px dashed #b2d8c0;border-radius:12px;padding:14px;font-size:13px;color:#1D9E75;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <i class="ti ti-camera" style="font-size:18px"></i> Fotografar nota de destino
+        </button>
+        <input type="file" id="file-foto-dest" accept="image/*" capture="environment" style="display:none" onchange="enviarFotoNota('dest', this)">
+        <div id="status-foto-dest" style="display:none;font-size:12px;margin-top:6px;text-align:center;"></div>
       </div>
-      <div id="dest-modo-foto">
-        <div class="upload-area" id="upload-dest" onclick="abrirCamera('dest')">
-          <div class="upload-icon"><i class="ti ti-camera" id="icon-dest"></i></div>
-          <div class="upload-label" id="label-dest">Fotografar nota fiscal / romaneio</div>
-          <div class="progress-bar"><div class="progress-fill" id="fill-dest"></div></div>
-          <div class="ai-badge"><i class="ti ti-sparkles" style="font-size:12px"></i> Lido pela IA</div>
-        </div>
-        <input type="file" id="file-dest" accept="image/*" capture="environment" style="display:none" onchange="processarImagem('dest', this)">
-      </div>
-      <div id="dest-modo-manual" style="display:none"><div class="manual-note"><i class="ti ti-info-circle" style="font-size:16px"></i> Preencha manualmente</div></div>
-      <div class="campos-doc" id="dest-campos" style="display:none">
-        <div class="frow"><div class="ffield full"><label>Local de destino <span class="tag-ia" id="tag-dest-local" style="display:none">IA</span></label><input type="text" id="f-dest-local" placeholder="Endereço de destino" /></div></div>
+      <div class="campos-doc" id="dest-campos" style="display:flex">
+        <div class="frow"><div class="ffield full"><label>Local de destino</label><input type="text" id="f-dest-local" placeholder="Endereço de destino" /></div></div>
         <div class="frow">
           <div class="ffield"><label>Tipo de documento</label><select id="sel-dest-tipo"><option value="">Selecione...</option><option value="nf">Nota fiscal</option><option value="romaneio">Romaneio</option></select></div>
-          <div class="ffield"><label>Nº documento <span class="tag-ia" id="tag-dest-ndoc" style="display:none">IA</span></label><input type="text" id="f-dest-ndoc" placeholder="Número" /></div>
+          <div class="ffield"><label>Nº documento</label><input type="text" id="f-dest-ndoc" placeholder="Número" /></div>
         </div>
-        <div class="frow"><div class="ffield full"><label>Produto <span class="tag-ia" id="tag-dest-prod" style="display:none">IA</span></label>
+        <div class="frow"><div class="ffield full"><label>Produto</label>
           <select id="f-dest-prod" onchange="toggleOutro('dest',this.value)">
             <option value="">Selecione o produto...</option>
             <optgroup label="Areias"><option>Areia Media Lavada</option><option>Areia Regular</option><option>Areia Fina</option><option>Areia Media de Rio</option></optgroup>
@@ -347,15 +340,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
             <optgroup label="Outro"><option value="outro">Outro (digitar)</option></optgroup>
           </select></div></div>
         <div class="frow" id="dest-outro-wrap" style="display:none"><div class="ffield full"><label>Descreva o produto</label><input type="text" id="f-dest-outro" placeholder="Digite..." /></div></div>
-        <div class="frow"><div class="ffield full"><label>Quantidade <span class="tag-ia" id="tag-dest-qtd" style="display:none">IA</span></label><input type="number" id="f-dest-qtd" placeholder="0.00" step="0.01" /></div></div>
+        <div class="frow"><div class="ffield full"><label>Quantidade</label><input type="number" id="f-dest-qtd" placeholder="0.00" step="0.01" /></div></div>
       </div>
-    </div>
-    <!-- Banner de confirmação IA -->
-    <div class="ia-review-banner" id="banner-confirmacao">
-      <div class="banner-msg"><i class="ti ti-alert-circle" style="font-size:18px;color:#f5c842"></i> Verifique os dados preenchidos pela IA antes de enviar!</div>
-      <button class="btn-confirmar" onclick="confirmarDadosIA()">
-        <i class="ti ti-circle-check" style="font-size:17px"></i> OK — Dados conferidos
-      </button>
     </div>
 
     <div class="erro-box" id="erro-entrega"></div>
@@ -633,6 +619,60 @@ function setModoKm(modo){
   if(modo==='manual') document.getElementById('km-campos').style.display='flex';
 }
 function abrirCamera(tipo) { document.getElementById('file-'+tipo).click(); }
+
+// ── Foto da nota por placa ────────────────────────
+async function enviarFotoNota(tipo, input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const placa = document.getElementById('e-placa').value.trim();
+  const statusEl = document.getElementById('status-foto-' + tipo);
+  const btnEl = document.getElementById('btn-foto-' + tipo);
+
+  if (!placa) {
+    mostrarErro('erro-entrega', 'Informe a placa antes de fotografar.');
+    return;
+  }
+
+  // Feedback visual
+  btnEl.style.background = '#edfaf3';
+  btnEl.innerHTML = '<i class="ti ti-loader-2" style="font-size:18px"></i> Enviando foto...';
+  statusEl.style.display = 'block';
+  statusEl.style.color = '#888';
+  statusEl.textContent = 'Enviando para o servidor...';
+
+  try {
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const motorista = localStorage.getItem('mb_motorista') || '';
+    const resp = await fetch(`${API}/foto`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imagem: base64, placa, tipo, motorista })
+    });
+    const dados = await resp.json();
+
+    if (dados.erro) throw new Error(dados.erro);
+
+    btnEl.style.background = '#edfaf3';
+    btnEl.style.borderColor = '#0d5c2e';
+    btnEl.innerHTML = '<i class="ti ti-circle-check" style="font-size:18px;color:#0d5c2e"></i> Foto salva ✓';
+    statusEl.style.color = '#0d5c2e';
+    statusEl.textContent = `Salvo em: ${dados.pasta}${dados.arquivo}`;
+
+  } catch (err) {
+    btnEl.style.background = '#fff0f0';
+    btnEl.style.borderColor = '#ffaaaa';
+    btnEl.innerHTML = '<i class="ti ti-camera" style="font-size:18px"></i> Fotografar nota de ' + (tipo === 'orig' ? 'coleta' : 'destino');
+    statusEl.style.color = '#c0392b';
+    statusEl.textContent = 'Erro ao enviar: ' + err.message;
+  }
+  input.value = '';
+}
 
 const lido={orig:false,dest:false};
 
