@@ -293,7 +293,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div class="form-scroll">
     <div class="fcard">
       <div class="fcard-title"><i class="ti ti-truck"></i> Veículo</div>
-      <div class="ffield"><label>Placa</label><input type="text" id="e-placa" placeholder="Ex: LXS2752" style="font-family:monospace;font-weight:600;text-transform:uppercase" /></div>
+      <div class="frow">
+        <div class="ffield"><label>Placa</label><input type="text" id="e-placa" placeholder="Selecione..." autocomplete="off" style="font-family:monospace;font-weight:600;text-transform:uppercase" /></div>
+        <div class="ffield"><label>Motorista</label><input type="text" id="e-motorista" placeholder="Selecione..." autocomplete="off" /></div>
+      </div>
     </div>
     <div class="fcard">
       <div class="fcard-title"><i class="ti ti-calendar"></i> Data e horário</div>
@@ -372,7 +375,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div class="form-scroll">
     <div class="fcard">
       <div class="fcard-title"><i class="ti ti-truck"></i> Veículo</div>
-      <div class="ffield"><label>Placa</label><input type="text" id="ab-placa" placeholder="Ex: LXS2752" style="font-family:monospace;font-weight:600;text-transform:uppercase" /></div>
+      <div class="frow">
+        <div class="ffield"><label>Placa</label><input type="text" id="ab-placa" placeholder="Selecione..." autocomplete="off" style="font-family:monospace;font-weight:600;text-transform:uppercase" /></div>
+        <div class="ffield"><label>Motorista</label><input type="text" id="ab-motorista" placeholder="Selecione..." autocomplete="off" /></div>
+      </div>
     </div>
     <div class="fcard">
       <div class="fcard-title"><i class="ti ti-calendar"></i> Data e horário</div>
@@ -417,7 +423,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div class="form-scroll">
     <div class="fcard">
       <div class="fcard-title"><i class="ti ti-truck"></i> Veículo</div>
-      <div class="ffield"><label>Placa</label><input type="text" id="mn-placa" placeholder="Ex: LXS2752" style="font-family:monospace;font-weight:600;text-transform:uppercase" /></div>
+      <div class="frow">
+        <div class="ffield"><label>Placa</label><input type="text" id="mn-placa" placeholder="Selecione..." autocomplete="off" style="font-family:monospace;font-weight:600;text-transform:uppercase" /></div>
+        <div class="ffield"><label>Motorista</label><input type="text" id="mn-motorista" placeholder="Selecione..." autocomplete="off" /></div>
+      </div>
     </div>
     <div class="fcard">
       <div class="fcard-title"><i class="ti ti-calendar"></i> Data e horário</div>
@@ -630,6 +639,8 @@ async function enviarFoto(tipo, subpasta, input) {
     placaId = 'mn-placa'; erroId = 'erro-manut';
     labelOriginal = 'Fotografar problema / manutenção';
   }
+  // motorista para o registro da foto
+  const motoristaId = placaId.replace('-placa', '-motorista');
 
   const placa = document.getElementById(placaId).value.trim();
   const statusEl = document.getElementById('status-foto-' + tipo);
@@ -653,7 +664,8 @@ async function enviarFoto(tipo, subpasta, input) {
       reader.readAsDataURL(file);
     });
 
-    const motorista = localStorage.getItem('mb_motorista') || '';
+    const motEl = document.getElementById(motoristaId);
+    const motorista = (motEl && motEl.value.trim()) || localStorage.getItem('mb_motorista') || '';
     const body = { imagem: base64, placa, tipo, motorista };
     if (subpasta) body.subpasta = subpasta;
 
@@ -880,11 +892,13 @@ function mostrarErro(id, msg){ const el=document.getElementById(id); el.textCont
 
 async function enviarEntrega() {
   const placa = document.getElementById('e-placa').value.trim();
+  const motorista = document.getElementById('e-motorista').value.trim();
   if(!placa) { mostrarErro('erro-entrega','Informe a placa do veículo.'); return; }
+  if(!motorista) { mostrarErro('erro-entrega','Informe o motorista.'); return; }
   const btn = document.getElementById('btn-enviar-entrega');
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2"></i> Enviando...';
   const dados = {
-    motorista: localStorage.getItem('mb_motorista') || 'Motorista',
+    motorista,
     placa,
     data: document.getElementById('e-data').value,
     hora: document.getElementById('e-hora').value,
@@ -898,21 +912,25 @@ async function enviarEntrega() {
   try {
     const res = await fetch(API+'/entregas', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(dados) });
     const json = await res.json();
-    if(res.ok){ document.getElementById('success-title').textContent='Entrega registrada!'; document.getElementById('success-overlay').classList.add('show'); }
-    else { mostrarErro('erro-entrega', json.erro || 'Erro ao enviar.'); }
-  } catch(e) { mostrarErro('erro-entrega','Não foi possível conectar ao servidor. Verifique se ele está rodando.'); }
-  btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Enviar entrega';
+    if(res.ok){
+      document.getElementById('success-title').textContent='Entrega registrada!';
+      document.getElementById('success-overlay').classList.add('show');
+      resetarEntrega();
+    } else { mostrarErro('erro-entrega', json.erro || 'Erro ao enviar.'); btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Enviar entrega'; }
+  } catch(e) { mostrarErro('erro-entrega','Não foi possível conectar ao servidor.'); btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Enviar entrega'; }
 }
 
 async function enviarAbast() {
   const placa = document.getElementById('ab-placa').value.trim();
+  const motorista = document.getElementById('ab-motorista').value.trim();
   if(!placa) { mostrarErro('erro-abast','Informe a placa do veículo.'); return; }
+  if(!motorista) { mostrarErro('erro-abast','Informe o motorista.'); return; }
   const btn = document.getElementById('btn-enviar-abast');
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2"></i> Enviando...';
   const l=parseFloat(document.getElementById('f-abast-litros').value)||0;
   const p=parseFloat(document.getElementById('f-abast-preco').value)||0;
   const dados = {
-    motorista: localStorage.getItem('mb_motorista') || 'Motorista',
+    motorista,
     placa,
     data: document.getElementById('ab-data').value,
     hora: document.getElementById('ab-hora').value,
@@ -926,19 +944,23 @@ async function enviarAbast() {
   try {
     const res = await fetch(API+'/abastecimentos', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(dados) });
     const json = await res.json();
-    if(res.ok){ document.getElementById('success-title').textContent='Abastecimento registrado!'; document.getElementById('success-overlay').classList.add('show'); }
-    else { mostrarErro('erro-abast', json.erro || 'Erro ao enviar.'); }
-  } catch(e) { mostrarErro('erro-abast','Não foi possível conectar ao servidor.'); }
-  btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Registrar abastecimento';
+    if(res.ok){
+      document.getElementById('success-title').textContent='Abastecimento registrado!';
+      document.getElementById('success-overlay').classList.add('show');
+      resetarAbast();
+    } else { mostrarErro('erro-abast', json.erro || 'Erro ao enviar.'); btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Registrar abastecimento'; }
+  } catch(e) { mostrarErro('erro-abast','Não foi possível conectar ao servidor.'); btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Registrar abastecimento'; }
 }
 
 async function enviarManut() {
   const placa = document.getElementById('mn-placa').value.trim();
+  const motorista = document.getElementById('mn-motorista').value.trim();
   if(!placa) { mostrarErro('erro-manut','Informe a placa do veículo.'); return; }
+  if(!motorista) { mostrarErro('erro-manut','Informe o motorista.'); return; }
   const btn = document.getElementById('btn-enviar-manut');
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2"></i> Enviando...';
   const dados = {
-    motorista: localStorage.getItem('mb_motorista') || 'Motorista',
+    motorista,
     placa,
     data: document.getElementById('mn-data').value,
     hora: document.getElementById('mn-hora').value,
@@ -950,15 +972,35 @@ async function enviarManut() {
   try {
     const res = await fetch(API+'/ocorrencias', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(dados) });
     const json = await res.json();
-    if(res.ok){ document.getElementById('success-title').textContent='Ocorrência registrada!'; document.getElementById('success-overlay').classList.add('show'); }
-    else { mostrarErro('erro-manut', json.erro || 'Erro ao enviar.'); }
-  } catch(e) { mostrarErro('erro-manut','Não foi possível conectar ao servidor.'); }
+    if(res.ok){
+      document.getElementById('success-title').textContent='Ocorrência registrada!';
+      document.getElementById('success-overlay').classList.add('show');
+      resetarManut();
+    } else { mostrarErro('erro-manut', json.erro || 'Erro ao enviar.'); btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Registrar ocorrência'; }
+  } catch(e) { mostrarErro('erro-manut','Não foi possível conectar ao servidor.'); btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Registrar ocorrência'; }
   btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Registrar ocorrência';
 }
 
 function fecharSucesso() { document.getElementById('success-overlay').classList.remove('show'); }
 
 // ── Autocomplete de locais ──────────────────────
+const MOTORISTAS = [
+  'Dani Ramon',
+  'Diego Maciel',
+  'Rodrigo Marques',
+  'Paulo Perfeito'
+];
+
+const PLACAS = [
+  'IRP 2425',
+  'IPL 2F40',
+  'IHZ2G86',
+  'IXS 2752',
+  'ISQ 0240',
+  'IIK 6429',
+  'POI 8D29'
+];
+
 const LOCAIS_COLETA = [
   'Jazida São Jose',
   'Mb Areias',
@@ -1035,6 +1077,76 @@ function selecionarAC(inputId, valor) {
 // Inicializa os campos de autocomplete
 criarAutocomplete('f-orig-local', LOCAIS_COLETA);
 criarAutocomplete('f-dest-local', CLIENTES_DESTINO);
+
+// Placa e motorista em todas as abas
+['e','ab','mn'].forEach(pref => {
+  criarAutocomplete(pref + '-placa', PLACAS);
+  criarAutocomplete(pref + '-motorista', MOTORISTAS);
+});
+
+// Pré-preenche motorista salvo no login
+const _motSalvo = localStorage.getItem('mb_motorista');
+if (_motSalvo) {
+  ['e-motorista','ab-motorista','mn-motorista'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = _motSalvo;
+  });
+}
+
+// ── Reset de formulário após envio ───────────────
+function resetarEntrega() {
+  ['f-orig-local','f-orig-ndoc','f-orig-prod','f-orig-qtd',
+   'f-dest-local','f-dest-ndoc','f-dest-prod','f-dest-qtd'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['sel-orig-tipo','sel-dest-tipo'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.selectedIndex = 0;
+  });
+  // Reset botões de foto
+  ['orig','dest'].forEach(t => {
+    const btn = document.getElementById('btn-foto-' + t);
+    const st = document.getElementById('status-foto-' + t);
+    if (btn) btn.innerHTML = '<i class="ti ti-camera" style="font-size:18px"></i> Fotografar nota de ' + (t==='orig'?'coleta':'destino');
+    if (st) { st.style.display='none'; st.textContent=''; }
+  });
+  const btn = document.getElementById('btn-enviar-entrega');
+  if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-send" style="font-size:17px"></i> Registrar entrega'; }
+}
+
+function resetarAbast() {
+  ['f-abast-posto','f-abast-litros','f-abast-preco','f-abast-km'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const comb = document.getElementById('f-abast-comb');
+  if (comb) comb.selectedIndex = 0;
+  document.getElementById('abast-total').textContent = 'R$ —';
+  const btn = document.getElementById('btn-foto-abast');
+  const st = document.getElementById('status-foto-abast');
+  if (btn) btn.innerHTML = '<i class="ti ti-camera" style="font-size:18px"></i> Fotografar cupom do posto';
+  if (st) { st.style.display='none'; st.textContent=''; }
+  const envBtn = document.getElementById('btn-enviar-abast');
+  if (envBtn) { envBtn.disabled = false; envBtn.innerHTML = '<i class="ti ti-send" style="font-size:17px"></i> Registrar abastecimento'; }
+}
+
+function resetarManut() {
+  const tipo = document.getElementById('f-manut-tipo');
+  const desc = document.getElementById('f-manut-desc');
+  const km = document.getElementById('f-mn-km');
+  const urg = document.getElementById('f-mn-urgencia');
+  if (tipo) tipo.selectedIndex = 0;
+  if (desc) desc.value = '';
+  if (km) km.value = '';
+  if (urg) urg.selectedIndex = 0;
+  const btn = document.getElementById('btn-foto-manut');
+  const st = document.getElementById('status-foto-manut');
+  if (btn) btn.innerHTML = '<i class="ti ti-camera" style="font-size:18px"></i> Fotografar problema / manutenção';
+  if (st) { st.style.display='none'; st.textContent=''; }
+  const envBtn = document.getElementById('btn-enviar-manut');
+  if (envBtn) { envBtn.disabled = false; envBtn.innerHTML = '<i class="ti ti-send" style="font-size:17px"></i> Registrar ocorrência'; }
+}
 </script>
 </body>
 </html>
