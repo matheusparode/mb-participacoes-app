@@ -597,16 +597,156 @@ function setModoKm(modo){
 function abrirCamera(tipo) { document.getElementById('file-'+tipo).click(); }
 
 const lido={orig:false,dest:false};
-function processarImagem(tipo, input) {
-  if(!input.files||!input.files[0]) return;
-  rodarUpload('upload-'+tipo,'fill-'+tipo,'icon-'+tipo,'label-'+tipo,'Analisando imagem...','Imagem processada com sucesso',()=>{
-    document.getElementById(tipo+'-campos') && (document.getElementById(tipo+'-campos').style.display='flex');
-    if(tipo==='abast'){ document.getElementById('abast-campos').style.display='flex'; }
-    if(tipo==='manut'){ document.getElementById('manut-campos').style.display='flex'; }
-    if(tipo==='km'){ document.getElementById('km-campos').style.display='flex'; }
-    lido[tipo]=true;
-  });
+
+function setIATag(id, show) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = show ? 'inline' : 'none';
 }
+function preencherCampoIA(id, valor) {
+  const el = document.getElementById(id);
+  if (el && valor) { el.value = valor; el.classList.add('preenchido'); }
+}
+
+async function processarImagem(tipo, input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const area = document.getElementById('upload-'+tipo);
+  const fill = document.getElementById('fill-'+tipo);
+  const icon = document.getElementById('icon-'+tipo);
+  const label = document.getElementById('label-'+tipo);
+
+  // Inicia animação
+  area.classList.add('loading');
+  icon.className = 'ti ti-loader-2';
+  label.textContent = 'Lendo nota com IA...';
+  let p = 0;
+  const iv = setInterval(() => { p = Math.min(p + 5, 90); fill.style.width = p + '%'; }, 200);
+
+  try {
+    // Converte imagem para base64
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    // Determina tipo para o servidor
+    const tipoOCR = tipo === 'abast' ? 'abastecimento' : 'entrega';
+
+    // Chama endpoint OCR
+    const resp = await fetch(`${API}/ocr`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imagem: base64, tipo: tipoOCR })
+    });
+    const dados = await resp.json();
+
+    clearInterval(iv);
+    fill.style.width = '100%';
+
+    if (dados.erro) throw new Error(dados.erro);
+
+    // Preenche select tentando match por texto
+    function selecionarSelect(id, texto) {
+      if (!texto) return;
+      const el = document.getElementById(id);
+      if (!el) return;
+      const t = texto.toLowerCase();
+      for (const opt of el.options) {
+        if (opt.text.toLowerCase().includes(t) || t.includes(opt.text.toLowerCase())) {
+          el.value = opt.value;
+          el.classList.add('preenchido');
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function selecionarTipoDoc(prefixo, texto) {
+      if (!texto) return;
+      const t = texto.toLowerCase();
+      const el = document.getElementById('sel-'+prefixo+'-tipo');
+      if (!el) return;
+      if (t.includes('nota') || t.includes('nf') || t.includes('fiscal')) el.value = 'nf';
+      else if (t.includes('romaneio')) el.value = 'romaneio';
+      if (el.value) el.classList.add('preenchido');
+    }
+
+    function selecionarProduto(prefixo, texto) {
+      if (!texto) return;
+      const encontrou = selecionarSelect('f-'+prefixo+'-prod', texto);
+      if (!encontrou) {
+        // Coloca em "Outro"
+        document.getElementById('f-'+prefixo+'-prod').value = 'outro';
+        document.getElementById(prefixo+'-outro-wrap').style.display = 'flex';
+        preencherCampoIA('f-'+prefixo+'-outro', texto);
+      }
+      setIATag('tag-'+prefixo+'-prod', true);
+    }
+
+    // Preenche campos conforme tipo
+    if (tipo === 'orig') {
+      preencherCampoIA('f-orig-local', dados.local);
+      selecionarTipoDoc('orig', dados.tipo_documento);
+      preencherCampoIA('f-orig-ndoc', dados.numero_documento);
+      selecionarProduto('orig', dados.produto);
+      preencherCampoIA('f-orig-qtd', dados.quantidade);
+      setIATag('tag-orig-local', !!dados.local);
+      setIATag('tag-orig-ndoc', !!dados.numero_documento);
+      setIATag('tag-orig-qtd', !!dados.quantidade);
+      document.getElementById('orig-campos').style.display = 'flex';
+    } else if (tipo === 'dest') {
+      preencherCampoIA('f-dest-local', dados.local);
+      selecionarTipoDoc('dest', dados.tipo_documento);
+      preencherCampoIA('f-dest-ndoc', dados.numero_documento);
+      selecionarProduto('dest', dados.produto);
+      preencherCampoIA('f-dest-qtd', dados.quantidade);
+      setIATag('tag-dest-local', !!dados.local);
+      setIATag('tag-dest-ndoc', !!dados.numero_documento);
+      setIATag('tag-dest-qtd', !!dados.quantidade);
+      document.getElementById('dest-campos').style.display = 'flex';
+    } else if (tipo === 'abast') {
+      preencherCampoIA('f-abast-posto', dados.posto);
+      selecionarSelect('f-abast-comb', dados.combustivel);
+      preencherCampoIA('f-abast-litros', dados.litros);
+      preencherCampoIA('f-abast-preco', dados.preco_litro);
+      preencherCampoIA('f-abast-km', dados.km_atual);
+      preencherCampoIA('f-abast-total', dados.total);
+      setIATag('tag-abast-posto', !!dados.posto);
+      setIATag('tag-abast-comb', !!dados.combustivel);
+      setIATag('tag-abast-litros', !!dados.litros);
+      document.getElementById('abast-campos').style.display = 'flex';
+      calcTotal();
+    } else if (tipo === 'km') {
+      preencherCampoIA('f-km-atual', dados.km_atual || dados.quantidade);
+      setIATag('tag-km', true);
+      document.getElementById('km-campos').style.display = 'flex';
+      calcKm();
+    } else if (tipo === 'manut') {
+      document.getElementById('manut-campos').style.display = 'flex';
+    }
+
+    setTimeout(() => {
+      area.classList.remove('loading');
+      area.classList.add('done');
+      icon.className = 'ti ti-circle-check';
+      label.textContent = '✓ Campos preenchidos pela IA';
+    }, 300);
+    lido[tipo] = true;
+
+  } catch (err) {
+    clearInterval(iv);
+    area.classList.remove('loading');
+    icon.className = 'ti ti-camera';
+    label.textContent = 'Fotografar nota fiscal / romaneio';
+    fill.style.width = '0%';
+    // Fallback: abre campos manuais
+    document.getElementById(tipo+'-campos') && (document.getElementById(tipo+'-campos').style.display = 'flex');
+    mostrarErro('erro-entrega', 'IA indisponível — preencha manualmente. (' + err.message + ')');
+  }
+}
+
 function rodarUpload(areaId,fillId,iconId,labelId,msgLoad,msgDone,cb){
   const area=document.getElementById(areaId),fill=document.getElementById(fillId),icon=document.getElementById(iconId),label=document.getElementById(labelId);
   if(!area) return;
