@@ -337,7 +337,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <div class="frow">
         <div class="ffield">
           <label>Placa</label>
-          <select class="placa-sel" id="e-placa" onchange="onPlacaChange('e')">
+          <select class="placa-sel" id="e-placa">
             <option value="">Selecione...</option>
             <option>IRP 2425</option>
             <option>IPL 2F40</option>
@@ -346,21 +346,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
             <option>ISQ 0240</option>
             <option>IIK 6429</option>
             <option>POI 8D29</option>
-            <option value="outro">✏️ Outro</option>
           </select>
-          <input type="text" id="e-placa-custom" placeholder="Digite a placa..." autocomplete="off" style="display:none;margin-top:6px;width:100%;border:1.5px solid #d0d0d0;border-radius:10px;padding:12px 14px;font-size:15px;font-family:monospace;font-weight:600;text-transform:uppercase;" />
         </div>
         <div class="ffield">
           <label>Motorista</label>
-          <select class="placa-sel" id="e-motorista" onchange="onMotoristaChange('e')">
+          <select class="placa-sel" id="e-motorista">
             <option value="">Selecione...</option>
             <option>Dani Ramon</option>
             <option>Diego Maciel</option>
             <option>Rodrigo Marques</option>
             <option>Paulo Perfeito</option>
-            <option value="outro">✏️ Outro</option>
           </select>
-          <input type="text" id="e-motorista-custom" placeholder="Digite o nome..." style="display:none;margin-top:6px;width:100%;border:1.5px solid #d0d0d0;border-radius:10px;padding:12px 14px;font-size:15px;font-family:inherit;font-weight:600;" />
         </div>
       </div>
     </div>
@@ -539,7 +535,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <div class="frow">
         <div class="ffield">
           <label>Placa</label>
-          <select class="placa-sel" id="ab-placa" onchange="onPlacaChange('ab')">
+          <select class="placa-sel" id="ab-placa">
             <option value="">Selecione...</option>
             <option>IRP 2425</option>
             <option>IPL 2F40</option>
@@ -548,21 +544,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
             <option>ISQ 0240</option>
             <option>IIK 6429</option>
             <option>POI 8D29</option>
-            <option value="outro">✏️ Outro</option>
           </select>
-          <input type="text" id="ab-placa-custom" placeholder="Digite a placa..." autocomplete="off" style="display:none;margin-top:6px;width:100%;border:1.5px solid #d0d0d0;border-radius:10px;padding:12px 14px;font-size:15px;font-family:monospace;font-weight:600;text-transform:uppercase;" />
         </div>
         <div class="ffield">
           <label>Motorista</label>
-          <select class="placa-sel" id="ab-motorista" onchange="onMotoristaChange('ab')">
+          <select class="placa-sel" id="ab-motorista">
             <option value="">Selecione...</option>
             <option>Dani Ramon</option>
             <option>Diego Maciel</option>
             <option>Rodrigo Marques</option>
             <option>Paulo Perfeito</option>
-            <option value="outro">✏️ Outro</option>
           </select>
-          <input type="text" id="ab-motorista-custom" placeholder="Digite o nome..." style="display:none;margin-top:6px;width:100%;border:1.5px solid #d0d0d0;border-radius:10px;padding:12px 14px;font-size:15px;font-family:inherit;font-weight:600;" />
         </div>
       </div>
     </div>
@@ -612,7 +604,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <div class="frow">
         <div class="ffield">
           <label>Placa</label>
-          <select class="placa-sel" id="mn-placa" onchange="onPlacaChange('mn')">
+          <select class="placa-sel" id="mn-placa">
             <option value="">Selecione...</option>
             <option>IRP 2425</option>
             <option>IPL 2F40</option>
@@ -621,21 +613,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
             <option>ISQ 0240</option>
             <option>IIK 6429</option>
             <option>POI 8D29</option>
-            <option value="outro">✏️ Outro</option>
           </select>
-          <input type="text" id="mn-placa-custom" placeholder="Digite a placa..." autocomplete="off" style="display:none;margin-top:6px;width:100%;border:1.5px solid #d0d0d0;border-radius:10px;padding:12px 14px;font-size:15px;font-family:monospace;font-weight:600;text-transform:uppercase;" />
         </div>
         <div class="ffield">
           <label>Motorista</label>
-          <select class="placa-sel" id="mn-motorista" onchange="onMotoristaChange('mn')">
+          <select class="placa-sel" id="mn-motorista">
             <option value="">Selecione...</option>
             <option>Dani Ramon</option>
             <option>Diego Maciel</option>
             <option>Rodrigo Marques</option>
             <option>Paulo Perfeito</option>
-            <option value="outro">✏️ Outro</option>
           </select>
-          <input type="text" id="mn-motorista-custom" placeholder="Digite o nome..." style="display:none;margin-top:6px;width:100%;border:1.5px solid #d0d0d0;border-radius:10px;padding:12px 14px;font-size:15px;font-family:inherit;font-weight:600;" />
         </div>
       </div>
     </div>
@@ -864,7 +852,7 @@ function iniciar() {
 }
 iniciar();
 
-// Popula select de local de coleta com fornecedores do servidor
+// Popula select de local de coleta com fornecedores do servidor (mescla com hardcoded)
 async function popularLocaisColeta() {
   try {
     const r = await fetch(`${API}/fornecedores`);
@@ -874,22 +862,20 @@ async function popularLocaisColeta() {
     const sel = document.getElementById('f-orig-local');
     if (!sel) return;
     const valorAtual = sel.value;
+    const existentes = new Set(Array.from(sel.options).map(o => o.value.toLowerCase()));
     const outro = sel.querySelector('option[value="outro"]');
-    // Remove opções anteriores (mantém só a primeira "Selecione" e o "Outro")
-    const primeira = sel.options[0];
-    while (sel.options.length > 1) sel.remove(1);
     lista.forEach(f => {
+      if (existentes.has(f.nome.toLowerCase())) return; // já existe, não duplicar
       const opt = document.createElement('option');
       opt.value = f.nome; opt.textContent = f.nome;
-      sel.appendChild(opt);
+      if (outro) sel.insertBefore(opt, outro);
+      else sel.appendChild(opt);
     });
-    if (outro) sel.appendChild(outro);
-    // Restaura valor selecionado anteriormente
     if (valorAtual) sel.value = valorAtual;
   } catch(e) { /* mantém lista estática se API indisponível */ }
 }
 
-// Popula select de local de destino com clientes do servidor
+// Popula select de local de destino com clientes do servidor (mescla com hardcoded)
 async function popularLocaisDestino() {
   try {
     const r = await fetch(`${API}/clientes`);
@@ -899,14 +885,15 @@ async function popularLocaisDestino() {
     const sel = document.getElementById('f-dest-local');
     if (!sel) return;
     const valorAtual = sel.value;
+    const existentes = new Set(Array.from(sel.options).map(o => o.value.toLowerCase()));
     const outro = sel.querySelector('option[value="outro"]');
-    while (sel.options.length > 1) sel.remove(1);
     lista.forEach(c => {
+      if (existentes.has(c.nome.toLowerCase())) return; // já existe, não duplicar
       const opt = document.createElement('option');
       opt.value = c.nome; opt.textContent = c.nome;
-      sel.appendChild(opt);
+      if (outro) sel.insertBefore(opt, outro);
+      else sel.appendChild(opt);
     });
-    if (outro) sel.appendChild(outro);
     if (valorAtual) sel.value = valorAtual;
   } catch(e) { /* mantém lista estática se API indisponível */ }
 }
