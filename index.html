@@ -238,6 +238,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .dt-coleta-destino { background: #f0fdf4; border: 1.5px solid #b2d8c0; border-radius: 10px; padding: 10px 12px; margin-bottom: 2px; }
 .dt-coleta-destino label { color: #0d5c2e !important; font-weight: 700 !important; }
 .dt-coleta-destino input[type=date], .dt-coleta-destino input[type=time] { border-color: #b2d8c0; }
+/* ── Seletor de motorista no login ── */
+.mot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+.mot-btn { background: #f4faf6; border: 2px solid #c8e6d0; border-radius: 12px; padding: 14px 8px; font-size: 14px; font-weight: 700; color: #0d5c2e; cursor: pointer; font-family: inherit; transition: all 0.15s; text-align: center; -webkit-tap-highlight-color: transparent; }
+.mot-btn:active { background: #0d5c2e; color: #fff; border-color: #0d5c2e; transform: scale(0.96); }
+.mot-btn.outro { grid-column: 1/-1; background: #fff8e1; border-color: #f5c842; color: #7a5c00; font-size: 13px; }
+/* ── Seletor de placa ── */
+.placa-sel { width: 100%; border: 1.5px solid #d0d0d0; border-radius: 10px; padding: 12px 14px; font-size: 15px; font-family: monospace; font-weight: 600; text-transform: uppercase; color: #111; background: #fafafa; -webkit-appearance: none; appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+.motorista-display { width: 100%; border: 1.5px solid #d0d0d0; border-radius: 10px; padding: 12px 14px; font-size: 14px; color: #444; background: #f5f5f5; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -255,16 +263,26 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     </svg>
   </div>
   <h2>MB Areias</h2>
-  <p>Digite seu nome para começar</p>
+  <p>Selecione seu nome para começar</p>
   <div class="login-card">
-    <label for="input-motorista">Seu nome</label>
-    <input type="text" id="input-motorista" placeholder="Ex: João Silva"
-      autocomplete="off" autocapitalize="words"
-      onkeydown="if(event.key==='Enter') fazerLogin()" />
-    <button onclick="fazerLogin()">
-      <i class="ti ti-login" style="font-size:17px"></i> Entrar
-    </button>
-    <div class="login-hint" id="login-hint">Digite seu nome para continuar.</div>
+    <div style="font-size:11px;font-weight:700;color:#0d5c2e;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Quem está dirigindo?</div>
+    <div class="mot-grid">
+      <button type="button" class="mot-btn" onclick="fazerLogin('Dani Ramon')">Dani Ramon</button>
+      <button type="button" class="mot-btn" onclick="fazerLogin('Diego Maciel')">Diego Maciel</button>
+      <button type="button" class="mot-btn" onclick="fazerLogin('Paulo Perfeito')">Paulo Perfeito</button>
+      <button type="button" class="mot-btn" onclick="fazerLogin('Rodrigo Marques')">Rodrigo Marques</button>
+      <button type="button" class="mot-btn outro" onclick="toggleOutroMotorista()">✏️ Outro motorista</button>
+    </div>
+    <div id="outro-motorista-wrap" style="display:none;margin-top:8px;">
+      <input type="text" id="input-motorista" placeholder="Digite seu nome..."
+        autocomplete="off" autocapitalize="words"
+        onkeydown="if(event.key==='Enter') fazerLogin()"
+        style="width:100%;border:2px solid #e0e0e0;border-radius:12px;padding:13px 16px;font-size:16px;font-family:inherit;color:#111;background:#fafafa;margin-bottom:8px;" />
+      <button onclick="fazerLogin()" style="width:100%;background:#0d5c2e;color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">
+        <i class="ti ti-login" style="font-size:17px"></i> Entrar
+      </button>
+    </div>
+    <div class="login-hint" id="login-hint" style="display:none">Selecione ou digite seu nome.</div>
     <div style="margin-top:16px;border-top:1px solid #e8e8e8;padding-top:14px;">
       <div style="font-size:11px;color:#999;text-align:center;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Configurações avançadas</div>
       <div id="server-config-collapsed" style="text-align:center;">
@@ -317,8 +335,22 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="fcard">
       <div class="fcard-title"><i class="ti ti-truck"></i> Veículo</div>
       <div class="frow">
-        <div class="ffield"><label>Placa</label><input type="text" id="e-placa" placeholder="Selecione..." autocomplete="off" style="font-family:monospace;font-weight:600;text-transform:uppercase" /></div>
-        <div class="ffield"><label>Motorista</label><input type="text" id="e-motorista" placeholder="Selecione..." autocomplete="off" /></div>
+        <div class="ffield">
+          <label>Placa</label>
+          <select class="placa-sel" id="e-placa" onchange="onPlacaChange('e')">
+            <option value="">Selecione...</option>
+            <option>IRP 2425</option>
+            <option>IPL 2F40</option>
+            <option>IHZ2G86</option>
+            <option>IXS 2752</option>
+            <option>ISQ 0240</option>
+            <option>IIK 6429</option>
+            <option>POI 8D29</option>
+            <option value="outro">✏️ Outro</option>
+          </select>
+          <input type="text" id="e-placa-custom" placeholder="Digite a placa..." autocomplete="off" style="display:none;margin-top:6px;width:100%;border:1.5px solid #d0d0d0;border-radius:10px;padding:12px 14px;font-size:15px;font-family:monospace;font-weight:600;text-transform:uppercase;" />
+        </div>
+        <div class="ffield"><label>Motorista</label><div class="motorista-display" id="e-motorista-display">—</div><input type="hidden" id="e-motorista" /></div>
       </div>
     </div>
     <div class="fcard">
@@ -437,8 +469,22 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="fcard">
       <div class="fcard-title"><i class="ti ti-truck"></i> Veículo</div>
       <div class="frow">
-        <div class="ffield"><label>Placa</label><input type="text" id="ab-placa" placeholder="Selecione..." autocomplete="off" style="font-family:monospace;font-weight:600;text-transform:uppercase" /></div>
-        <div class="ffield"><label>Motorista</label><input type="text" id="ab-motorista" placeholder="Selecione..." autocomplete="off" /></div>
+        <div class="ffield">
+          <label>Placa</label>
+          <select class="placa-sel" id="ab-placa" onchange="onPlacaChange('ab')">
+            <option value="">Selecione...</option>
+            <option>IRP 2425</option>
+            <option>IPL 2F40</option>
+            <option>IHZ2G86</option>
+            <option>IXS 2752</option>
+            <option>ISQ 0240</option>
+            <option>IIK 6429</option>
+            <option>POI 8D29</option>
+            <option value="outro">✏️ Outro</option>
+          </select>
+          <input type="text" id="ab-placa-custom" placeholder="Digite a placa..." autocomplete="off" style="display:none;margin-top:6px;width:100%;border:1.5px solid #d0d0d0;border-radius:10px;padding:12px 14px;font-size:15px;font-family:monospace;font-weight:600;text-transform:uppercase;" />
+        </div>
+        <div class="ffield"><label>Motorista</label><div class="motorista-display" id="ab-motorista-display">—</div><input type="hidden" id="ab-motorista" /></div>
       </div>
     </div>
     <div class="fcard">
@@ -485,8 +531,22 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="fcard">
       <div class="fcard-title"><i class="ti ti-truck"></i> Veículo</div>
       <div class="frow">
-        <div class="ffield"><label>Placa</label><input type="text" id="mn-placa" placeholder="Selecione..." autocomplete="off" style="font-family:monospace;font-weight:600;text-transform:uppercase" /></div>
-        <div class="ffield"><label>Motorista</label><input type="text" id="mn-motorista" placeholder="Selecione..." autocomplete="off" /></div>
+        <div class="ffield">
+          <label>Placa</label>
+          <select class="placa-sel" id="mn-placa" onchange="onPlacaChange('mn')">
+            <option value="">Selecione...</option>
+            <option>IRP 2425</option>
+            <option>IPL 2F40</option>
+            <option>IHZ2G86</option>
+            <option>IXS 2752</option>
+            <option>ISQ 0240</option>
+            <option>IIK 6429</option>
+            <option>POI 8D29</option>
+            <option value="outro">✏️ Outro</option>
+          </select>
+          <input type="text" id="mn-placa-custom" placeholder="Digite a placa..." autocomplete="off" style="display:none;margin-top:6px;width:100%;border:1.5px solid #d0d0d0;border-radius:10px;padding:12px 14px;font-size:15px;font-family:monospace;font-weight:600;text-transform:uppercase;" />
+        </div>
+        <div class="ffield"><label>Motorista</label><div class="motorista-display" id="mn-motorista-display">—</div><input type="hidden" id="mn-motorista" /></div>
       </div>
     </div>
     <div class="fcard">
@@ -609,25 +669,68 @@ function resetarServerUrl() {
 }
 
 // ── LOGIN ──────────────────────────────
-function fazerLogin() {
-  const nome = document.getElementById('input-motorista').value.trim();
+function fazerLogin(nomeParam) {
+  const nome = nomeParam || (document.getElementById('input-motorista')?.value.trim() || '');
   if (!nome) {
     const hint = document.getElementById('login-hint');
-    hint.style.display = 'block';
-    document.getElementById('input-motorista').focus();
+    if (hint) { hint.style.display = 'block'; }
+    const inp = document.getElementById('input-motorista');
+    if (inp) inp.focus();
     return;
   }
   localStorage.setItem('mb_motorista', nome);
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('nome-motorista').textContent = nome;
+  preencherMotoristas(nome);
+}
+
+function toggleOutroMotorista() {
+  const wrap = document.getElementById('outro-motorista-wrap');
+  if (!wrap) return;
+  wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
+  if (wrap.style.display !== 'none') {
+    const inp = document.getElementById('input-motorista');
+    if (inp) setTimeout(() => inp.focus(), 100);
+  }
+}
+
+function preencherMotoristas(nome) {
+  ['e','ab','mn'].forEach(p => {
+    const disp = document.getElementById(p+'-motorista-display');
+    const inp  = document.getElementById(p+'-motorista');
+    if (disp) disp.textContent = nome;
+    if (inp)  inp.value = nome;
+  });
 }
 
 function trocarMotorista() {
   localStorage.removeItem('mb_motorista');
-  document.getElementById('input-motorista').value = '';
-  document.getElementById('login-hint').style.display = 'none';
+  const inp = document.getElementById('input-motorista');
+  if (inp) inp.value = '';
+  const hint = document.getElementById('login-hint');
+  if (hint) hint.style.display = 'none';
+  const wrap = document.getElementById('outro-motorista-wrap');
+  if (wrap) wrap.style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
-  setTimeout(() => document.getElementById('input-motorista').focus(), 100);
+}
+
+// ── Placa: mostrar/ocultar campo "Outro" ──
+function onPlacaChange(prefix) {
+  const sel    = document.getElementById(prefix+'-placa');
+  const custom = document.getElementById(prefix+'-placa-custom');
+  if (!sel || !custom) return;
+  custom.style.display = sel.value === 'outro' ? 'block' : 'none';
+  if (sel.value === 'outro') custom.focus();
+}
+
+// Retorna o valor real da placa (select ou custom)
+function getPlacaVal(prefix) {
+  const sel = document.getElementById(prefix+'-placa');
+  if (!sel) return '';
+  if (sel.value === 'outro') {
+    return (document.getElementById(prefix+'-placa-custom')?.value.trim().toUpperCase()) || '';
+  }
+  return sel.value.trim().toUpperCase();
 }
 
 function iniciar() {
@@ -652,8 +755,7 @@ function iniciar() {
   if (nome) {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('nome-motorista').textContent = nome;
-  } else {
-    setTimeout(() => document.getElementById('input-motorista').focus(), 300);
+    preencherMotoristas(nome);
   }
   // Carrega rascunho de coleta se houver (sobrescreve campos de coleta)
   carregarRascunhoColeta();
@@ -1086,8 +1188,12 @@ function limparRascunhoColeta() {
 
 function mostrarErro(id, msg){ const el=document.getElementById(id); el.textContent=msg; el.style.display='block'; setTimeout(()=>el.style.display='none',4000); }
 
+// ── Proteção contra duplo envio ──
+let _enviando = false;
+
 async function enviarEntrega() {
-  const placa      = document.getElementById('e-placa').value.trim();
+  if (_enviando) return;
+  const placa      = getPlacaVal('e');
   const motorista  = document.getElementById('e-motorista').value.trim();
   const coleta     = document.getElementById('f-orig-local').value.trim();
   const destino    = document.getElementById('f-dest-local').value.trim();
@@ -1124,6 +1230,7 @@ async function enviarEntrega() {
     mostrarErro('erro-entrega','⚠️ Horário de coleta e entrega devem ser diferentes.'); return;
   }
 
+  _enviando = true;
   const btn = document.getElementById('btn-enviar-entrega');
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2"></i> Enviando...';
 
@@ -1157,13 +1264,16 @@ async function enviarEntrega() {
       resetarEntrega();
     } else { mostrarErro('erro-entrega', json.erro || 'Erro ao enviar.'); btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Enviar entrega'; }
   } catch(e) { mostrarErro('erro-entrega','Não foi possível conectar ao servidor.'); btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Enviar entrega'; }
+  finally { _enviando = false; }
 }
 
 async function enviarAbast() {
-  const placa = document.getElementById('ab-placa').value.trim();
+  if (_enviando) return;
+  const placa = getPlacaVal('ab');
   const motorista = document.getElementById('ab-motorista').value.trim();
   if(!placa) { mostrarErro('erro-abast','Informe a placa do veículo.'); return; }
   if(!motorista) { mostrarErro('erro-abast','Informe o motorista.'); return; }
+  _enviando = true;
   const btn = document.getElementById('btn-enviar-abast');
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2"></i> Enviando...';
   const l=parseFloat(document.getElementById('f-abast-litros').value)||0;
@@ -1189,13 +1299,16 @@ async function enviarAbast() {
       resetarAbast();
     } else { mostrarErro('erro-abast', json.erro || 'Erro ao enviar.'); btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Registrar abastecimento'; }
   } catch(e) { mostrarErro('erro-abast','Não foi possível conectar ao servidor.'); btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Registrar abastecimento'; }
+  finally { _enviando = false; }
 }
 
 async function enviarManut() {
-  const placa = document.getElementById('mn-placa').value.trim();
+  if (_enviando) return;
+  const placa = getPlacaVal('mn');
   const motorista = document.getElementById('mn-motorista').value.trim();
   if(!placa) { mostrarErro('erro-manut','Informe a placa do veículo.'); return; }
   if(!motorista) { mostrarErro('erro-manut','Informe o motorista.'); return; }
+  _enviando = true;
   const btn = document.getElementById('btn-enviar-manut');
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2"></i> Enviando...';
   const dados = {
@@ -1217,7 +1330,7 @@ async function enviarManut() {
       resetarManut();
     } else { mostrarErro('erro-manut', json.erro || 'Erro ao enviar.'); btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Registrar ocorrência'; }
   } catch(e) { mostrarErro('erro-manut','Não foi possível conectar ao servidor.'); btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Registrar ocorrência'; }
-  btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Registrar ocorrência';
+  finally { _enviando = false; btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Registrar ocorrência'; }
 }
 
 function fecharSucesso() { document.getElementById('success-overlay').classList.remove('show'); }
