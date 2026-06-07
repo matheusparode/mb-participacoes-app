@@ -568,6 +568,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 <script>
 const DEFAULT_API = 'http://localhost:3000';
 let API = localStorage.getItem('mb_server_url') || DEFAULT_API;
+// Auto-configura pelo parâmetro ?server= na URL (usado pelo atalho do gestor)
+try {
+  const _sp = new URLSearchParams(window.location.search).get('server');
+  if (_sp) { API = _sp; localStorage.setItem('mb_server_url', _sp); }
+} catch(e) {}
 
 function toggleServerConfig() {
   const form = document.getElementById('server-config-form');
