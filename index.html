@@ -266,21 +266,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <p>Selecione seu nome para começar</p>
   <div class="login-card">
     <div style="font-size:11px;font-weight:700;color:#0d5c2e;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Quem está dirigindo?</div>
-    <div class="mot-grid">
+    <div class="mot-grid" id="mot-grid-login">
+      <!-- Preenchido dinamicamente pela API -->
       <button type="button" class="mot-btn" onclick="fazerLogin('Dani Ramon')">Dani Ramon</button>
       <button type="button" class="mot-btn" onclick="fazerLogin('Diego Maciel')">Diego Maciel</button>
       <button type="button" class="mot-btn" onclick="fazerLogin('Paulo Perfeito')">Paulo Perfeito</button>
       <button type="button" class="mot-btn" onclick="fazerLogin('Rodrigo Marques')">Rodrigo Marques</button>
-      <button type="button" class="mot-btn outro" onclick="toggleOutroMotorista()">✏️ Outro motorista</button>
-    </div>
-    <div id="outro-motorista-wrap" style="display:none;margin-top:8px;">
-      <input type="text" id="input-motorista" placeholder="Digite seu nome..."
-        autocomplete="off" autocapitalize="words"
-        onkeydown="if(event.key==='Enter') fazerLogin()"
-        style="width:100%;border:2px solid #e0e0e0;border-radius:12px;padding:13px 16px;font-size:16px;font-family:inherit;color:#111;background:#fafafa;margin-bottom:8px;" />
-      <button onclick="fazerLogin()" style="width:100%;background:#0d5c2e;color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">
-        <i class="ti ti-login" style="font-size:17px"></i> Entrar
-      </button>
     </div>
     <div class="login-hint" id="login-hint" style="display:none">Selecione ou digite seu nome.</div>
     <div style="margin-top:16px;border-top:1px solid #e8e8e8;padding-top:14px;">
@@ -765,14 +756,54 @@ function fazerLogin(nomeParam) {
   preencherMotoristas(nome);
 }
 
-function toggleOutroMotorista() {
-  const wrap = document.getElementById('outro-motorista-wrap');
-  if (!wrap) return;
-  wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
-  if (wrap.style.display !== 'none') {
-    const inp = document.getElementById('input-motorista');
-    if (inp) setTimeout(() => inp.focus(), 100);
-  }
+// Popula grid de motoristas no login e selects nas abas
+async function popularMotoristas() {
+  try {
+    const r = await fetch(`${API}/motoristas`);
+    if (!r.ok) return;
+    const lista = await r.json();
+    if (!lista || !lista.length) return;
+    // Grid de login
+    const grid = document.getElementById('mot-grid-login');
+    if (grid) {
+      grid.innerHTML = lista.map(m =>
+        `<button type="button" class="mot-btn" onclick="fazerLogin('${m.nome.replace(/'/g,"\\'")}')">${m.nome}</button>`
+      ).join('');
+    }
+    // Selects nas 3 abas
+    ['e-motorista','ab-motorista','mn-motorista'].forEach(id => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      const anterior = sel.value;
+      sel.innerHTML = '<option value="">Selecione...</option>';
+      lista.forEach(m => {
+        const o = document.createElement('option');
+        o.value = m.nome; o.textContent = m.nome; sel.appendChild(o);
+      });
+      if (anterior) sel.value = anterior;
+    });
+  } catch(e) {}
+}
+
+// Popula selects de placa nas 3 abas
+async function popularPlacas() {
+  try {
+    const r = await fetch(`${API}/placas`);
+    if (!r.ok) return;
+    const lista = await r.json();
+    if (!lista || !lista.length) return;
+    ['e-placa','ab-placa','mn-placa'].forEach(id => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      const anterior = sel.value;
+      sel.innerHTML = '<option value="">Selecione...</option>';
+      lista.forEach(p => {
+        const o = document.createElement('option');
+        o.value = p.numero; o.textContent = p.numero; sel.appendChild(o);
+      });
+      if (anterior) sel.value = anterior;
+    });
+  } catch(e) {}
 }
 
 function onMotoristaChange(prefix) {
@@ -808,13 +839,10 @@ function onPlacaChange(prefix) {
   if (sel.value === 'outro') custom.focus();
 }
 
-// Retorna o valor real da placa (select ou custom)
+// Retorna o valor real da placa
 function getPlacaVal(prefix) {
   const sel = document.getElementById(prefix+'-placa');
   if (!sel) return '';
-  if (sel.value === 'outro') {
-    return (document.getElementById(prefix+'-placa-custom')?.value.trim().toUpperCase()) || '';
-  }
   return sel.value.trim().toUpperCase();
 }
 
@@ -849,7 +877,9 @@ function iniciar() {
   // Carrega rascunho de coleta se houver (sobrescreve campos de coleta)
   carregarRascunhoColeta();
   restaurarEntregaFull();
-  // Carrega locais dinâmicos da API (não-bloqueante)
+  // Carrega listas dinâmicas da API (não-bloqueante)
+  popularMotoristas();
+  popularPlacas();
   popularLocaisColeta();
   popularLocaisDestino();
 }
