@@ -443,7 +443,48 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
           <div class="ffield"><label style="color:#1565C0!important">📅 Data entrega</label><input type="date" id="e-data-destino" style="border-color:#90CAF9;" /></div>
           <div class="ffield"><label style="color:#1565C0!important">🕐 Hora entrega</label><input type="time" id="e-hora-destino" style="border-color:#90CAF9;" /></div>
         </div>
-        <div class="frow"><div class="ffield full"><label>Local de destino</label><input type="text" id="f-dest-local" placeholder="Digite ou selecione o cliente..." autocomplete="off" /></div></div>
+        <div class="frow"><div class="ffield full">
+          <label>Local de destino</label>
+          <select class="placa-sel" id="f-dest-local" onchange="onLocalChange('f-dest-local')">
+            <option value="">Selecione o destino...</option>
+            <option>Alcará</option>
+            <option>Barotti</option>
+            <option>Bn</option>
+            <option>Brascofer</option>
+            <option>Caçula</option>
+            <option>Caldrefião</option>
+            <option>Casa Nova</option>
+            <option>Casarolli</option>
+            <option>Conceição</option>
+            <option>Curcel</option>
+            <option>Dauge</option>
+            <option>Depauli</option>
+            <option>Destak</option>
+            <option>Duarte</option>
+            <option>Ferrajão</option>
+            <option>Figueiredo</option>
+            <option>Franzoi</option>
+            <option>Gardas</option>
+            <option>Guarienti</option>
+            <option>Jumbo</option>
+            <option>Lima</option>
+            <option>Mad Center</option>
+            <option>Madekasa</option>
+            <option>Madevatti</option>
+            <option>Mb Areias</option>
+            <option>Obra</option>
+            <option>Petter</option>
+            <option>Rigoni</option>
+            <option>Renova</option>
+            <option>São João</option>
+            <option>São Jorge</option>
+            <option>São Vicenti</option>
+            <option>Virtual</option>
+            <option>Vivian</option>
+            <option value="outro">✏️ Outro (digitar manualmente)</option>
+          </select>
+          <input type="text" id="f-dest-local-custom" placeholder="Digite o local de destino..." style="display:none;margin-top:6px;width:100%;padding:10px;border:1.5px solid #1565C0;border-radius:8px;font-size:1em;"/>
+        </div></div>
         <div class="frow">
           <div class="ffield"><label>Tipo de documento</label>
             <select id="sel-dest-tipo" onchange="onTipoDoc('dest')">
@@ -1165,7 +1206,7 @@ function autoSalvarEntregaFull() {
   const ids = ['e-placa','e-motorista','e-data-coleta','e-hora-coleta',
     'f-orig-local','f-orig-local-custom','sel-orig-tipo','f-orig-ndoc','f-orig-prod','f-orig-outro','f-orig-qtd',
     'e-data-destino','e-hora-destino',
-    'f-dest-local','sel-dest-tipo','f-dest-ndoc','f-dest-prod','f-dest-outro','f-dest-qtd'];
+    'f-dest-local','f-dest-local-custom','sel-dest-tipo','f-dest-ndoc','f-dest-prod','f-dest-outro','f-dest-qtd'];
   const d = {};
   ids.forEach(id => { const el = document.getElementById(id); if(el) d[id] = el.value; });
   localStorage.setItem(RASCUNHO_FULL_KEY, JSON.stringify(d));
@@ -1258,7 +1299,7 @@ async function enviarEntrega() {
   const placa      = getPlacaVal('e');
   const motorista  = document.getElementById('e-motorista').value.trim();
   const coleta     = getLocalVal('f-orig-local');
-  const destino    = document.getElementById('f-dest-local').value.trim();
+  const destino    = getLocalVal('f-dest-local');
   const tipoOrig   = document.getElementById('sel-orig-tipo').value;
   const ndocOrig   = document.getElementById('f-orig-ndoc').value.trim();
   const tipoDest   = document.getElementById('sel-dest-tipo').value;
@@ -1490,7 +1531,6 @@ function selecionarAC(inputId, valor) {
 
 // Inicializa os campos de autocomplete
 criarAutocomplete('f-orig-local', LOCAIS_COLETA);
-criarAutocomplete('f-dest-local', CLIENTES_DESTINO);
 
 // Placa e motorista em todas as abas
 ['e','ab','mn'].forEach(pref => {
@@ -1509,8 +1549,8 @@ if (_motSalvo) {
 
 // ── Reset de formulário após envio ───────────────
 function resetarEntrega() {
-  ['f-orig-local','f-orig-ndoc','f-orig-outro','f-orig-qtd',
-   'f-dest-local','f-dest-ndoc','f-dest-outro','f-dest-qtd'].forEach(id => {
+  ['f-orig-local','f-orig-local-custom','f-orig-ndoc','f-orig-outro','f-orig-qtd',
+   'f-dest-local','f-dest-local-custom','f-dest-ndoc','f-dest-outro','f-dest-qtd'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
