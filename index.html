@@ -652,8 +652,16 @@ function iniciar() {
   }
   // Carrega rascunho de coleta se houver (sobrescreve campos de coleta)
   carregarRascunhoColeta();
+  restaurarEntregaFull();
 }
 iniciar();
+
+// Auto-save completo a cada alteração nos campos da entrega
+const _entregaTab = document.getElementById('content-entrega');
+if (_entregaTab) {
+  _entregaTab.addEventListener('input', autoSalvarEntregaFull);
+  _entregaTab.addEventListener('change', autoSalvarEntregaFull);
+}
 // ── FIM LOGIN ──────────────────────────
 
 function showTab(t) {
@@ -984,6 +992,32 @@ function confirmarDadosIA() {
 
 // ── Rascunho de coleta ───────────────────────────
 const RASCUNHO_KEY = 'mb_coleta_rascunho';
+const RASCUNHO_FULL_KEY = 'mb_entrega_full';
+
+function autoSalvarEntregaFull() {
+  const ids = ['e-placa','e-motorista','e-data-coleta','e-hora-coleta',
+    'f-orig-local','sel-orig-tipo','f-orig-ndoc','f-orig-prod','f-orig-outro','f-orig-qtd',
+    'e-data-destino','e-hora-destino',
+    'f-dest-local','sel-dest-tipo','f-dest-ndoc','f-dest-prod','f-dest-outro','f-dest-qtd'];
+  const d = {};
+  ids.forEach(id => { const el = document.getElementById(id); if(el) d[id] = el.value; });
+  localStorage.setItem(RASCUNHO_FULL_KEY, JSON.stringify(d));
+}
+
+function restaurarEntregaFull() {
+  const raw = localStorage.getItem(RASCUNHO_FULL_KEY);
+  if (!raw) return;
+  try {
+    const d = JSON.parse(raw);
+    const set = (id, val) => { const el = document.getElementById(id); if(el && val !== undefined && val !== '') el.value = val; };
+    Object.entries(d).forEach(([id, val]) => set(id, val));
+    if (d['f-orig-prod'] === 'outro') { const w = document.getElementById('orig-outro-wrap'); if(w) w.style.display='grid'; }
+    if (d['sel-orig-tipo'] === 'sem_nota') { const w = document.getElementById('orig-ndoc-wrap'); if(w) w.style.display='none'; }
+    if (d['f-dest-prod'] === 'outro') { const w = document.getElementById('dest-outro-wrap'); if(w) w.style.display='grid'; }
+    if (d['sel-dest-tipo'] === 'sem_nota') { const w = document.getElementById('dest-ndoc-wrap'); if(w) w.style.display='none'; }
+    if (d['f-orig-qtd']) try { sincronizarQtd(d['f-orig-qtd']); } catch(e) {}
+  } catch(e) {}
+}
 
 function salvarColeta() {
   const rascunho = {
@@ -1040,6 +1074,7 @@ function carregarRascunhoColeta() {
 
 function limparRascunhoColeta() {
   localStorage.removeItem(RASCUNHO_KEY);
+  localStorage.removeItem(RASCUNHO_FULL_KEY);
   const b = document.getElementById('coleta-rascunho-banner');
   if (b) b.classList.remove('show');
 }
