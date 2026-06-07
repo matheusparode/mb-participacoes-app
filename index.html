@@ -215,6 +215,29 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .success-box p { font-size: 14px; color: #666; margin-bottom: 20px; }
 .success-box button { background: #0d5c2e; color: #fff; border: none; border-radius: 10px; padding: 12px 24px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
 .erro-box { background: #fff0f0; border: 1px solid #ffcccc; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #c0392b; display: none; margin-top: 8px; }
+.btn-salvar-coleta {
+  background: #1D9E75; color: #fff; border: none;
+  border-radius: 12px; padding: 13px 16px; width: 100%;
+  font-size: 14px; font-weight: 700; font-family: inherit;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 4px;
+}
+.btn-salvar-coleta:active { background: #0d7a5a; transform: scale(0.98); }
+.coleta-salva-banner {
+  background: #edfaf3; border: 1.5px solid #1D9E75; border-radius: 10px;
+  padding: 10px 14px; font-size: 13px; color: #0d5c2e;
+  display: none; align-items: center; gap: 8px; font-weight: 600;
+}
+.coleta-salva-banner.show { display: flex; }
+.coleta-rascunho-banner {
+  background: #fff8e1; border: 1.5px solid #f5c842; border-radius: 10px;
+  padding: 10px 14px; font-size: 13px; color: #7a5c00;
+  display: none; align-items: center; justify-content: space-between; gap: 8px;
+}
+.coleta-rascunho-banner.show { display: flex; }
+.dt-coleta-destino { background: #f0fdf4; border: 1.5px solid #b2d8c0; border-radius: 10px; padding: 10px 12px; margin-bottom: 2px; }
+.dt-coleta-destino label { color: #0d5c2e !important; font-weight: 700 !important; }
+.dt-coleta-destino input[type=date], .dt-coleta-destino input[type=time] { border-color: #b2d8c0; }
 </style>
 </head>
 <body>
@@ -299,13 +322,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       </div>
     </div>
     <div class="fcard">
-      <div class="fcard-title"><i class="ti ti-calendar"></i> Data e horário</div>
-      <div class="frow">
-        <div class="ffield"><label>Data <span class="tag-auto">automático</span></label><input type="text" id="e-data" class="auto" readonly /><div class="edit-hint"><i class="ti ti-lock" style="font-size:11px"></i> Bloqueado</div></div>
-        <div class="ffield"><label>Horário <span class="tag-auto">automático</span></label><input type="time" id="e-hora" class="auto" /><div class="edit-hint"><i class="ti ti-pencil" style="font-size:11px"></i> Toque para alterar</div></div>
-      </div>
-    </div>
-    <div class="fcard">
       <div class="fcard-title"><i class="ti ti-package-import"></i> Coleta do material</div>
 
       <!-- Botão de foto da nota de coleta -->
@@ -319,6 +335,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       </div>
 
       <div class="campos-doc" id="orig-campos" style="display:flex">
+        <div class="frow dt-coleta-destino">
+          <div class="ffield"><label>📅 Data coleta <span class="tag-auto">auto</span></label><input type="date" id="e-data-coleta" /></div>
+          <div class="ffield"><label>🕐 Hora coleta <span class="tag-auto">auto</span></label><input type="time" id="e-hora-coleta" /></div>
+        </div>
         <div class="frow"><div class="ffield full"><label>Local de coleta</label><input type="text" id="f-orig-local" placeholder="Digite ou selecione o local..." autocomplete="off" /></div></div>
         <div class="frow">
           <div class="ffield"><label>Tipo de documento</label>
@@ -347,6 +367,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
         <div class="frow" id="orig-outro-wrap" style="display:none"><div class="ffield full"><label>Descreva o produto</label><input type="text" id="f-orig-outro" placeholder="Digite..." /></div></div>
         <div class="frow"><div class="ffield full"><label>Quantidade m³</label><input type="number" id="f-orig-qtd" placeholder="0.00" step="0.01" oninput="sincronizarQtd(this.value)" /></div></div>
       </div>
+      <div id="coleta-rascunho-banner" class="coleta-rascunho-banner">
+        <span>📋 Rascunho de coleta carregado</span>
+        <button type="button" onclick="limparRascunhoColeta()" style="background:none;border:none;color:#b48000;cursor:pointer;font-size:0.82rem;font-weight:700;">Limpar ✕</button>
+      </div>
+      <div id="coleta-salva-banner" class="coleta-salva-banner">
+        <i class="ti ti-circle-check" style="font-size:18px"></i>
+        <span id="coleta-salva-txt">Dados de coleta salvos!</span>
+      </div>
+      <button type="button" class="btn-salvar-coleta" id="btn-salvar-coleta" onclick="salvarColeta()">
+        <i class="ti ti-device-floppy" style="font-size:17px"></i> Salvar dados de coleta
+      </button>
       <div class="section-divider"></div>
       <div class="fcard-title" style="margin-top:4px"><i class="ti ti-map-pin-check"></i> Destino do material</div>
 
@@ -360,6 +391,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
         <div id="status-foto-dest" style="display:none;font-size:12px;margin-top:6px;text-align:center;"></div>
       </div>
       <div class="campos-doc" id="dest-campos" style="display:flex">
+        <div class="frow dt-coleta-destino" style="background:#f0f6ff;border-color:#90CAF9;">
+          <div class="ffield"><label style="color:#1565C0!important">📅 Data entrega</label><input type="date" id="e-data-destino" style="border-color:#90CAF9;" /></div>
+          <div class="ffield"><label style="color:#1565C0!important">🕐 Hora entrega</label><input type="time" id="e-hora-destino" style="border-color:#90CAF9;" /></div>
+        </div>
         <div class="frow"><div class="ffield full"><label>Local de destino</label><input type="text" id="f-dest-local" placeholder="Digite ou selecione o cliente..." autocomplete="off" /></div></div>
         <div class="frow">
           <div class="ffield"><label>Tipo de documento</label>
@@ -592,10 +627,21 @@ function trocarMotorista() {
 
 function iniciar() {
   const d = new Date();
-  const data = d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+  const dataLeg = d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+  const iso = d.toISOString().slice(0,10); // YYYY-MM-DD
   const hora = d.toTimeString().slice(0,5);
-  ['e-data','ab-data','mn-data'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=data; });
-  ['e-hora','ab-hora','mn-hora'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=hora; });
+  // Abastecimento e manutenção continuam com formato legível
+  ['ab-data','mn-data'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=dataLeg; });
+  ['ab-hora','mn-hora'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=hora; });
+  // Entrega: campos separados para coleta e destino
+  const dcol = document.getElementById('e-data-coleta');
+  const hcol = document.getElementById('e-hora-coleta');
+  const ddest = document.getElementById('e-data-destino');
+  const hdest = document.getElementById('e-hora-destino');
+  if (dcol) dcol.value = iso;
+  if (hcol) hcol.value = hora;
+  if (ddest) ddest.value = iso;
+  if (hdest) hdest.value = hora;
 
   const nome = localStorage.getItem('mb_motorista');
   if (nome) {
@@ -604,6 +650,8 @@ function iniciar() {
   } else {
     setTimeout(() => document.getElementById('input-motorista').focus(), 300);
   }
+  // Carrega rascunho de coleta se houver (sobrescreve campos de coleta)
+  carregarRascunhoColeta();
 }
 iniciar();
 // ── FIM LOGIN ──────────────────────────
@@ -934,46 +982,122 @@ function confirmarDadosIA() {
   setTimeout(() => { banner.classList.remove('show','ok'); }, 2500);
 }
 
+// ── Rascunho de coleta ───────────────────────────
+const RASCUNHO_KEY = 'mb_coleta_rascunho';
+
+function salvarColeta() {
+  const rascunho = {
+    data_coleta: document.getElementById('e-data-coleta')?.value || '',
+    hora_coleta: document.getElementById('e-hora-coleta')?.value || '',
+    local_coleta: document.getElementById('f-orig-local')?.value || '',
+    tipo_orig: document.getElementById('sel-orig-tipo')?.value || '',
+    ndoc_orig: document.getElementById('f-orig-ndoc')?.value || '',
+    prod_orig: document.getElementById('f-orig-prod')?.value || '',
+    prod_outro: document.getElementById('f-orig-outro')?.value || '',
+    qtd_orig: document.getElementById('f-orig-qtd')?.value || '',
+    placa: document.getElementById('e-placa')?.value || '',
+    motorista: document.getElementById('e-motorista')?.value || '',
+    salvo_em: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})
+  };
+  localStorage.setItem(RASCUNHO_KEY, JSON.stringify(rascunho));
+
+  const banner = document.getElementById('coleta-salva-banner');
+  const txt = document.getElementById('coleta-salva-txt');
+  if (txt) txt.textContent = `✓ Dados de coleta salvos às ${rascunho.salvo_em}`;
+  if (banner) {
+    banner.classList.add('show');
+    setTimeout(() => banner.classList.remove('show'), 4000);
+  }
+}
+
+function carregarRascunhoColeta() {
+  const raw = localStorage.getItem(RASCUNHO_KEY);
+  if (!raw) return;
+  try {
+    const r = JSON.parse(raw);
+    const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+    set('e-data-coleta', r.data_coleta);
+    set('e-hora-coleta', r.hora_coleta);
+    set('f-orig-local', r.local_coleta);
+    set('sel-orig-tipo', r.tipo_orig);
+    set('f-orig-ndoc', r.ndoc_orig);
+    set('f-orig-prod', r.prod_orig);
+    set('f-orig-outro', r.prod_outro);
+    set('f-orig-qtd', r.qtd_orig);
+    if (r.placa) set('e-placa', r.placa);
+    if (r.motorista && !localStorage.getItem('mb_motorista')) set('e-motorista', r.motorista);
+    if (r.prod_orig === 'outro') { const w = document.getElementById('orig-outro-wrap'); if(w) w.style.display='grid'; }
+    if (r.tipo_orig === 'sem_nota') { const w = document.getElementById('orig-ndoc-wrap'); if(w) w.style.display='none'; }
+    if (r.qtd_orig) sincronizarQtd(r.qtd_orig);
+
+    const banner = document.getElementById('coleta-rascunho-banner');
+    if (banner) {
+      banner.querySelector('span').textContent = `📋 Rascunho de coleta carregado (salvo às ${r.salvo_em || '—'})`;
+      banner.classList.add('show');
+    }
+  } catch(e) { localStorage.removeItem(RASCUNHO_KEY); }
+}
+
+function limparRascunhoColeta() {
+  localStorage.removeItem(RASCUNHO_KEY);
+  const b = document.getElementById('coleta-rascunho-banner');
+  if (b) b.classList.remove('show');
+}
+
 function mostrarErro(id, msg){ const el=document.getElementById(id); el.textContent=msg; el.style.display='block'; setTimeout(()=>el.style.display='none',4000); }
 
 async function enviarEntrega() {
-  const placa     = document.getElementById('e-placa').value.trim();
-  const motorista = document.getElementById('e-motorista').value.trim();
-  const coleta    = document.getElementById('f-orig-local').value.trim();
-  const destino   = document.getElementById('f-dest-local').value.trim();
-  const tipoOrig  = document.getElementById('sel-orig-tipo').value;
-  const ndocOrig  = document.getElementById('f-orig-ndoc').value.trim();
-  const tipoDest  = document.getElementById('sel-dest-tipo').value;
-  const ndocDest  = document.getElementById('f-dest-ndoc').value.trim();
-  const prod      = document.getElementById('f-orig-prod').value;
-  const prodOutro = document.getElementById('f-orig-outro').value.trim();
-  const qtd       = document.getElementById('f-orig-qtd').value.trim();
+  const placa      = document.getElementById('e-placa').value.trim();
+  const motorista  = document.getElementById('e-motorista').value.trim();
+  const coleta     = document.getElementById('f-orig-local').value.trim();
+  const destino    = document.getElementById('f-dest-local').value.trim();
+  const tipoOrig   = document.getElementById('sel-orig-tipo').value;
+  const ndocOrig   = document.getElementById('f-orig-ndoc').value.trim();
+  const tipoDest   = document.getElementById('sel-dest-tipo').value;
+  const ndocDest   = document.getElementById('f-dest-ndoc').value.trim();
+  const prod       = document.getElementById('f-orig-prod').value;
+  const prodOutro  = document.getElementById('f-orig-outro').value.trim();
+  const qtd        = document.getElementById('f-orig-qtd').value.trim();
+  const dataColeta = document.getElementById('e-data-coleta').value;
+  const horaColeta = document.getElementById('e-hora-coleta').value;
+  const dataDest   = document.getElementById('e-data-destino').value;
+  const horaDest   = document.getElementById('e-hora-destino').value;
 
   if (!placa)     { mostrarErro('erro-entrega','Informe a placa do veículo.'); return; }
   if (!motorista) { mostrarErro('erro-entrega','Informe o motorista.'); return; }
+  if (!dataColeta){ mostrarErro('erro-entrega','Informe a data de coleta.'); return; }
+  if (!horaColeta){ mostrarErro('erro-entrega','Informe a hora de coleta.'); return; }
   if (!coleta)    { mostrarErro('erro-entrega','Informe o local de coleta.'); return; }
   if (!tipoOrig)  { mostrarErro('erro-entrega','Selecione o tipo de documento da coleta.'); return; }
   if (tipoOrig !== 'sem_nota' && !ndocOrig) { mostrarErro('erro-entrega','Informe o nº do documento de coleta (ou clique S/N).'); return; }
   if (!prod)      { mostrarErro('erro-entrega','Selecione o produto.'); return; }
   if (prod === 'outro' && !prodOutro) { mostrarErro('erro-entrega','Descreva o produto.'); return; }
   if (!qtd)       { mostrarErro('erro-entrega','Informe a quantidade.'); return; }
+  if (!dataDest)  { mostrarErro('erro-entrega','Informe a data de entrega.'); return; }
+  if (!horaDest)  { mostrarErro('erro-entrega','Informe a hora de entrega.'); return; }
   if (!destino)   { mostrarErro('erro-entrega','Informe o local de destino.'); return; }
   if (!tipoDest)  { mostrarErro('erro-entrega','Selecione o tipo de documento do destino.'); return; }
   if (tipoDest !== 'sem_nota' && !ndocDest) { mostrarErro('erro-entrega','Informe o nº do documento de destino (ou clique S/N).'); return; }
 
+  // Horários de coleta e destino devem ser diferentes
+  if (dataColeta === dataDest && horaColeta === horaDest) {
+    mostrarErro('erro-entrega','⚠️ Horário de coleta e entrega devem ser diferentes.'); return;
+  }
+
   const btn = document.getElementById('btn-enviar-entrega');
   btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2"></i> Enviando...';
 
-  // Monta label do doc
   const labelTipo = { nf:'NF', romaneio:'ROM', sem_nota:'Sem nota/Romaneio' };
-  const docColeta = tipoOrig === 'sem_nota' ? 'Sem nota/Romaneio' : `${labelTipo[tipoOrig]||tipoOrig} ${ndocOrig}`;
+  const docColeta  = tipoOrig === 'sem_nota' ? 'Sem nota/Romaneio' : `${labelTipo[tipoOrig]||tipoOrig} ${ndocOrig}`;
   const docDestino = tipoDest === 'sem_nota' ? 'Sem nota/Romaneio' : `${labelTipo[tipoDest]||tipoDest} ${ndocDest}`;
 
   const dados = {
     motorista,
     placa,
-    data: document.getElementById('e-data').value,
-    hora: document.getElementById('e-hora').value,
+    data_coleta: dataColeta,
+    hora_coleta: horaColeta,
+    data_destino: dataDest,
+    hora_destino: horaDest,
     local_coleta: coleta,
     local_destino: destino,
     produto: prod === 'outro' ? prodOutro : prod,
@@ -989,6 +1113,7 @@ async function enviarEntrega() {
     if(res.ok){
       document.getElementById('success-title').textContent='Entrega registrada!';
       document.getElementById('success-overlay').classList.add('show');
+      limparRascunhoColeta();
       resetarEntrega();
     } else { mostrarErro('erro-entrega', json.erro || 'Erro ao enviar.'); btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Enviar entrega'; }
   } catch(e) { mostrarErro('erro-entrega','Não foi possível conectar ao servidor.'); btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Enviar entrega'; }
@@ -1185,6 +1310,14 @@ function resetarEntrega() {
     const outro = document.getElementById(l + '-outro-wrap');
     if (outro) outro.style.display = 'none';
   });
+  // Reinicializa datas/horas com os valores atuais
+  const d = new Date();
+  const iso = d.toISOString().slice(0,10);
+  const hora = d.toTimeString().slice(0,5);
+  const dcol = document.getElementById('e-data-coleta'); if(dcol) dcol.value = iso;
+  const hcol = document.getElementById('e-hora-coleta'); if(hcol) hcol.value = hora;
+  const ddest = document.getElementById('e-data-destino'); if(ddest) ddest.value = iso;
+  const hdest = document.getElementById('e-hora-destino'); if(hdest) hdest.value = hora;
   // Reset botões de foto
   ['orig','dest'].forEach(t => {
     const btn = document.getElementById('btn-foto-' + t);
@@ -1193,7 +1326,7 @@ function resetarEntrega() {
     if (st) { st.style.display='none'; st.textContent=''; }
   });
   const btn = document.getElementById('btn-enviar-entrega');
-  if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-send" style="font-size:17px"></i> Registrar entrega'; }
+  if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-send" style="font-size:17px"></i> Enviar entrega'; }
 }
 
 function resetarAbast() {
