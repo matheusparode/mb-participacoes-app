@@ -724,6 +724,10 @@ try {
   if (_sp) { API = _sp; localStorage.setItem('mb_server_url', _sp); }
 } catch(e) {}
 
+// Chaves de rascunho — declaradas antes de qualquer uso
+const RASCUNHO_KEY      = 'mb_coleta_rascunho';
+const RASCUNHO_FULL_KEY = 'mb_entrega_full';
+
 function toggleServerConfig() {
   const form = document.getElementById('server-config-form');
   const btn = document.getElementById('server-config-collapsed');
@@ -1236,8 +1240,6 @@ function confirmarDadosIA() {
 }
 
 // ── Rascunho de coleta ───────────────────────────
-const RASCUNHO_KEY = 'mb_coleta_rascunho';
-const RASCUNHO_FULL_KEY = 'mb_entrega_full';
 
 function autoSalvarEntregaFull() {
   const ids = ['e-placa','e-motorista','e-motorista-custom','e-data-coleta','e-hora-coleta',
@@ -1305,8 +1307,8 @@ function carregarRascunhoColeta() {
     set('f-orig-prod', r.prod_orig);
     set('f-orig-outro', r.prod_outro);
     set('f-orig-qtd', r.qtd_orig);
-    if (r.placa) set('e-placa', r.placa);
-    if (r.motorista && !localStorage.getItem('mb_motorista')) set('e-motorista', r.motorista);
+    if (r.placa) setLocalVal('e-placa', r.placa);
+    if (r.motorista && !localStorage.getItem('mb_motorista')) setLocalVal('e-motorista', r.motorista);
     if (r.prod_orig === 'outro') { const w = document.getElementById('orig-outro-wrap'); if(w) w.style.display='grid'; }
     if (r.tipo_orig === 'sem_nota') { const w = document.getElementById('orig-ndoc-wrap'); if(w) w.style.display='none'; }
     if (r.qtd_orig) sincronizarQtd(r.qtd_orig);
