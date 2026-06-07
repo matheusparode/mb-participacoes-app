@@ -1653,7 +1653,7 @@ function criarAutocomplete(inputId, opcoes) {
 
     list.innerHTML = matches.map(o =>
       `<div class="ac-item" onmousedown="selecionarAC('${inputId}','${o.replace(/'/g,"\\'")}')">${o}</div>`
-    ).join('') +
+    ).join('');
     `<div class="ac-item ac-outro" onmousedown="selecionarAC('${inputId}','__outro__')">✏️ Outro (digitar manualmente)</div>`;
 
     list.style.display = 'block';
@@ -1681,14 +1681,10 @@ function selecionarAC(inputId, valor) {
   if (list) list.style.display = 'none';
 }
 
-// Inicializa os campos de autocomplete
-criarAutocomplete('f-orig-local', LOCAIS_COLETA);
+// Autocomplete desativado
 
-// Placa e motorista em todas as abas
-['e','ab','mn'].forEach(pref => {
-  criarAutocomplete(pref + '-placa', PLACAS);
-  criarAutocomplete(pref + '-motorista', MOTORISTAS);
-});
+
+
 
 // Pré-preenche motorista salvo no login
 const _motSalvo = localStorage.getItem('mb_motorista');
