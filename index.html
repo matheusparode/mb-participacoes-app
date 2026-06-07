@@ -371,7 +371,23 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
           <div class="ffield"><label>📅 Data coleta <span class="tag-auto">auto</span></label><input type="date" id="e-data-coleta" /></div>
           <div class="ffield"><label>🕐 Hora coleta <span class="tag-auto">auto</span></label><input type="time" id="e-hora-coleta" /></div>
         </div>
-        <div class="frow"><div class="ffield full"><label>Local de coleta</label><input type="text" id="f-orig-local" placeholder="Digite ou selecione o local..." autocomplete="off" /></div></div>
+        <div class="frow"><div class="ffield full">
+          <label>Local de coleta</label>
+          <select class="placa-sel" id="f-orig-local" onchange="onLocalChange('f-orig-local')">
+            <option value="">Selecione o local...</option>
+            <option>Jazida São José</option>
+            <option>MB Areias</option>
+            <option>Mineração Peixoto</option>
+            <option>Pedracon (Porto Alegre)</option>
+            <option>Mineração Vera Cruz (Monte Negro)</option>
+            <option>Mineração Vera Cruz (Campo Bom)</option>
+            <option>Jazida Irmãos</option>
+            <option>Jazida Monte Blanco</option>
+            <option>Sulmin</option>
+            <option value="outro">✏️ Outro (digitar manualmente)</option>
+          </select>
+          <input type="text" id="f-orig-local-custom" placeholder="Digite o local de coleta..." autocomplete="off" style="display:none;margin-top:6px;width:100%;border:1.5px solid #d0d0d0;border-radius:10px;padding:12px 14px;font-size:14px;" />
+        </div></div>
         <div class="frow">
           <div class="ffield"><label>Tipo de documento</label>
             <select id="sel-orig-tipo" onchange="onTipoDoc('orig')">
@@ -909,9 +925,53 @@ function setIATag(id, show) {
   const el = document.getElementById(id);
   if (el) el.style.display = show ? 'inline' : 'none';
 }
+// Lê valor real de um select com opção "outro" (ou input normal)
+function getLocalVal(selectId) {
+  const el = document.getElementById(selectId);
+  if (!el) return '';
+  if (el.tagName === 'SELECT') {
+    if (el.value === 'outro') return (document.getElementById(selectId+'-custom')?.value.trim()) || '';
+    return el.value;
+  }
+  return el.value.trim();
+}
+
+// Define valor num select-com-outro (ou input normal)
+function setLocalVal(selectId, val) {
+  if (!val) return;
+  const el = document.getElementById(selectId);
+  if (!el) return;
+  if (el.tagName === 'SELECT') {
+    const match = Array.from(el.options).find(o => o.value === val || o.text === val);
+    if (match) {
+      el.value = match.value;
+      const c = document.getElementById(selectId+'-custom');
+      if (c) c.style.display = 'none';
+    } else {
+      el.value = 'outro';
+      const c = document.getElementById(selectId+'-custom');
+      if (c) { c.style.display = 'block'; c.value = val; }
+    }
+  } else { el.value = val; }
+}
+
+function onLocalChange(id) {
+  const el = document.getElementById(id);
+  const custom = document.getElementById(id+'-custom');
+  if (!el || !custom) return;
+  custom.style.display = el.value === 'outro' ? 'block' : 'none';
+  if (el.value === 'outro') custom.focus();
+}
+
 function preencherCampoIA(id, valor) {
   const el = document.getElementById(id);
-  if (el && valor) { el.value = valor; el.classList.add('preenchido'); }
+  if (!el || valor == null || valor === '') return;
+  if (el.tagName === 'SELECT') {
+    setLocalVal(id, valor);
+  } else {
+    el.value = valor;
+    el.classList.add('preenchido');
+  }
 }
 
 async function processarImagem(tipo, input) {
@@ -1103,7 +1163,7 @@ const RASCUNHO_FULL_KEY = 'mb_entrega_full';
 
 function autoSalvarEntregaFull() {
   const ids = ['e-placa','e-motorista','e-data-coleta','e-hora-coleta',
-    'f-orig-local','sel-orig-tipo','f-orig-ndoc','f-orig-prod','f-orig-outro','f-orig-qtd',
+    'f-orig-local','f-orig-local-custom','sel-orig-tipo','f-orig-ndoc','f-orig-prod','f-orig-outro','f-orig-qtd',
     'e-data-destino','e-hora-destino',
     'f-dest-local','sel-dest-tipo','f-dest-ndoc','f-dest-prod','f-dest-outro','f-dest-qtd'];
   const d = {};
@@ -1117,7 +1177,9 @@ function restaurarEntregaFull() {
   try {
     const d = JSON.parse(raw);
     const set = (id, val) => { const el = document.getElementById(id); if(el && val !== undefined && val !== '') el.value = val; };
-    Object.entries(d).forEach(([id, val]) => set(id, val));
+    Object.entries(d).forEach(([id, val]) => { if (!id.endsWith('-custom')) set(id, val); });
+    // Restaura select-com-outro (local coleta)
+    if (d['f-orig-local']) setLocalVal('f-orig-local', d['f-orig-local'] === 'outro' ? d['f-orig-local-custom'] || '' : d['f-orig-local']);
     if (d['f-orig-prod'] === 'outro') { const w = document.getElementById('orig-outro-wrap'); if(w) w.style.display='grid'; }
     if (d['sel-orig-tipo'] === 'sem_nota') { const w = document.getElementById('orig-ndoc-wrap'); if(w) w.style.display='none'; }
     if (d['f-dest-prod'] === 'outro') { const w = document.getElementById('dest-outro-wrap'); if(w) w.style.display='grid'; }
@@ -1130,7 +1192,7 @@ function salvarColeta() {
   const rascunho = {
     data_coleta: document.getElementById('e-data-coleta')?.value || '',
     hora_coleta: document.getElementById('e-hora-coleta')?.value || '',
-    local_coleta: document.getElementById('f-orig-local')?.value || '',
+    local_coleta: getLocalVal('f-orig-local'),
     tipo_orig: document.getElementById('sel-orig-tipo')?.value || '',
     ndoc_orig: document.getElementById('f-orig-ndoc')?.value || '',
     prod_orig: document.getElementById('f-orig-prod')?.value || '',
@@ -1159,7 +1221,7 @@ function carregarRascunhoColeta() {
     const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
     set('e-data-coleta', r.data_coleta);
     set('e-hora-coleta', r.hora_coleta);
-    set('f-orig-local', r.local_coleta);
+    setLocalVal('f-orig-local', r.local_coleta);
     set('sel-orig-tipo', r.tipo_orig);
     set('f-orig-ndoc', r.ndoc_orig);
     set('f-orig-prod', r.prod_orig);
@@ -1195,7 +1257,7 @@ async function enviarEntrega() {
   if (_enviando) return;
   const placa      = getPlacaVal('e');
   const motorista  = document.getElementById('e-motorista').value.trim();
-  const coleta     = document.getElementById('f-orig-local').value.trim();
+  const coleta     = getLocalVal('f-orig-local');
   const destino    = document.getElementById('f-dest-local').value.trim();
   const tipoOrig   = document.getElementById('sel-orig-tipo').value;
   const ndocOrig   = document.getElementById('f-orig-ndoc').value.trim();
