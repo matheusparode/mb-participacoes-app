@@ -716,6 +716,13 @@ try {
 const RASCUNHO_KEY      = 'mb_coleta_rascunho';
 const RASCUNHO_FULL_KEY = 'mb_entrega_full';
 
+// Cache de fornecedores e clientes carregados da API
+let _fornecedoresList = [];
+let _clientesList     = [];
+// HTML padrão dos selects de produto (salvo antes de qualquer filtro)
+let _produtosPadraoOrig = '';
+let _produtosPadraoDest = '';
+
 function toggleServerConfig() {
   const form = document.getElementById('server-config-form');
   const btn = document.getElementById('server-config-collapsed');
@@ -820,6 +827,10 @@ function getPlacaVal(prefix) {
 }
 
 function iniciar() {
+  // Salva HTML padrão dos produtos antes de qualquer filtro
+  _produtosPadraoOrig = document.getElementById('f-orig-prod')?.innerHTML || '';
+  _produtosPadraoDest = document.getElementById('f-dest-prod')?.innerHTML || '';
+
   const d = new Date();
   const dataLeg = d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
   const iso = d.toISOString().slice(0,10); // YYYY-MM-DD
@@ -852,48 +863,49 @@ function iniciar() {
 }
 iniciar();
 
-// Popula select de local de coleta com fornecedores do servidor (mescla com hardcoded)
+// Popula select de local de coleta com fornecedores do servidor
+// Se API disponível: substitui a lista (incluindo remoções); se não: mantém lista estática
 async function popularLocaisColeta() {
   try {
     const r = await fetch(`${API}/fornecedores`);
     if (!r.ok) return;
     const lista = await r.json();
     if (!lista || !lista.length) return;
+    _fornecedoresList = lista; // cache para filtro de produtos
     const sel = document.getElementById('f-orig-local');
     if (!sel) return;
     const valorAtual = sel.value;
-    const existentes = new Set(Array.from(sel.options).map(o => o.value.toLowerCase()));
     const outro = sel.querySelector('option[value="outro"]');
+    while (sel.options.length > 1) sel.remove(1);
     lista.forEach(f => {
-      if (existentes.has(f.nome.toLowerCase())) return; // já existe, não duplicar
       const opt = document.createElement('option');
       opt.value = f.nome; opt.textContent = f.nome;
-      if (outro) sel.insertBefore(opt, outro);
-      else sel.appendChild(opt);
+      sel.appendChild(opt);
     });
+    if (outro) sel.appendChild(outro);
     if (valorAtual) sel.value = valorAtual;
   } catch(e) { /* mantém lista estática se API indisponível */ }
 }
 
-// Popula select de local de destino com clientes do servidor (mescla com hardcoded)
+// Popula select de local de destino com clientes do servidor
 async function popularLocaisDestino() {
   try {
     const r = await fetch(`${API}/clientes`);
     if (!r.ok) return;
     const lista = await r.json();
     if (!lista || !lista.length) return;
+    _clientesList = lista; // cache para filtro de produtos
     const sel = document.getElementById('f-dest-local');
     if (!sel) return;
     const valorAtual = sel.value;
-    const existentes = new Set(Array.from(sel.options).map(o => o.value.toLowerCase()));
     const outro = sel.querySelector('option[value="outro"]');
+    while (sel.options.length > 1) sel.remove(1);
     lista.forEach(c => {
-      if (existentes.has(c.nome.toLowerCase())) return; // já existe, não duplicar
       const opt = document.createElement('option');
       opt.value = c.nome; opt.textContent = c.nome;
-      if (outro) sel.insertBefore(opt, outro);
-      else sel.appendChild(opt);
+      sel.appendChild(opt);
     });
+    if (outro) sel.appendChild(outro);
     if (valorAtual) sel.value = valorAtual;
   } catch(e) { /* mantém lista estática se API indisponível */ }
 }
@@ -1080,6 +1092,61 @@ function onLocalChange(id) {
   if (!el || !custom) return;
   custom.style.display = el.value === 'outro' ? 'block' : 'none';
   if (el.value === 'outro') custom.focus();
+  // Filtra produtos pelo fornecedor/cliente selecionado
+  if (id === 'f-orig-local') filtrarProdutosPorFornecedor(el.value);
+  if (id === 'f-dest-local') filtrarProdutosPorCliente(el.value);
+}
+
+async function filtrarProdutosPorFornecedor(nomeFornecedor) {
+  const sel = document.getElementById('f-orig-prod');
+  if (!sel) return;
+  if (!nomeFornecedor || nomeFornecedor === 'outro' || nomeFornecedor === '') {
+    sel.innerHTML = _produtosPadraoOrig; return;
+  }
+  const f = _fornecedoresList.find(x => x.nome === nomeFornecedor);
+  if (!f) { sel.innerHTML = _produtosPadraoOrig; return; }
+  try {
+    const r = await fetch(`${API}/precos-compra?fornecedor_id=${f.id}`);
+    if (!r.ok) { sel.innerHTML = _produtosPadraoOrig; return; }
+    const precos = await r.json();
+    if (!precos || !precos.length) { sel.innerHTML = _produtosPadraoOrig; return; }
+    const anterior = sel.value;
+    sel.innerHTML = '<option value="">Selecione o produto...</option>';
+    precos.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p.produto; o.textContent = p.produto; sel.appendChild(o);
+    });
+    const outrOpt = document.createElement('option');
+    outrOpt.value = 'outro'; outrOpt.textContent = 'Outro (digitar)'; sel.appendChild(outrOpt);
+    const match = Array.from(sel.options).find(o => o.value === anterior || o.text === anterior);
+    if (match) sel.value = match.value;
+  } catch(e) { sel.innerHTML = _produtosPadraoOrig; }
+}
+
+async function filtrarProdutosPorCliente(nomeCliente) {
+  const sel = document.getElementById('f-dest-prod');
+  if (!sel) return;
+  if (!nomeCliente || nomeCliente === 'outro' || nomeCliente === '') {
+    sel.innerHTML = _produtosPadraoDest; return;
+  }
+  const c = _clientesList.find(x => x.nome === nomeCliente);
+  if (!c) { sel.innerHTML = _produtosPadraoDest; return; }
+  try {
+    const r = await fetch(`${API}/precos-venda?cliente_id=${c.id}`);
+    if (!r.ok) { sel.innerHTML = _produtosPadraoDest; return; }
+    const precos = await r.json();
+    if (!precos || !precos.length) { sel.innerHTML = _produtosPadraoDest; return; }
+    const anterior = sel.value;
+    sel.innerHTML = '<option value="">Selecione o produto...</option>';
+    precos.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p.produto; o.textContent = p.produto; sel.appendChild(o);
+    });
+    const outrOpt = document.createElement('option');
+    outrOpt.value = 'outro'; outrOpt.textContent = 'Outro (digitar)'; sel.appendChild(outrOpt);
+    const match = Array.from(sel.options).find(o => o.value === anterior || o.text === anterior);
+    if (match) sel.value = match.value;
+  } catch(e) { sel.innerHTML = _produtosPadraoDest; }
 }
 
 function preencherCampoIA(id, valor) {
