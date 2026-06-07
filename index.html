@@ -350,7 +350,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
           </select>
           <input type="text" id="e-placa-custom" placeholder="Digite a placa..." autocomplete="off" style="display:none;margin-top:6px;width:100%;border:1.5px solid #d0d0d0;border-radius:10px;padding:12px 14px;font-size:15px;font-family:monospace;font-weight:600;text-transform:uppercase;" />
         </div>
-        <div class="ffield"><label>Motorista</label><div class="motorista-display" id="e-motorista-display">—</div><input type="hidden" id="e-motorista" /></div>
+        <div class="ffield">
+          <label>Motorista</label>
+          <select class="placa-sel" id="e-motorista" onchange="onMotoristaChange('e')">
+            <option value="">Selecione...</option>
+            <option>Dani Ramon</option>
+            <option>Diego Maciel</option>
+            <option>Rodrigo Marques</option>
+            <option>Paulo Perfeito</option>
+            <option value="outro">✏️ Outro</option>
+          </select>
+          <input type="text" id="e-motorista-custom" placeholder="Digite o nome..." style="display:none;margin-top:6px;width:100%;border:1.5px solid #d0d0d0;border-radius:10px;padding:12px 14px;font-size:15px;font-family:inherit;font-weight:600;" />
+        </div>
       </div>
     </div>
     <div class="fcard">
@@ -541,7 +552,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
           </select>
           <input type="text" id="ab-placa-custom" placeholder="Digite a placa..." autocomplete="off" style="display:none;margin-top:6px;width:100%;border:1.5px solid #d0d0d0;border-radius:10px;padding:12px 14px;font-size:15px;font-family:monospace;font-weight:600;text-transform:uppercase;" />
         </div>
-        <div class="ffield"><label>Motorista</label><div class="motorista-display" id="ab-motorista-display">—</div><input type="hidden" id="ab-motorista" /></div>
+        <div class="ffield">
+          <label>Motorista</label>
+          <select class="placa-sel" id="ab-motorista" onchange="onMotoristaChange('ab')">
+            <option value="">Selecione...</option>
+            <option>Dani Ramon</option>
+            <option>Diego Maciel</option>
+            <option>Rodrigo Marques</option>
+            <option>Paulo Perfeito</option>
+            <option value="outro">✏️ Outro</option>
+          </select>
+          <input type="text" id="ab-motorista-custom" placeholder="Digite o nome..." style="display:none;margin-top:6px;width:100%;border:1.5px solid #d0d0d0;border-radius:10px;padding:12px 14px;font-size:15px;font-family:inherit;font-weight:600;" />
+        </div>
       </div>
     </div>
     <div class="fcard">
@@ -603,7 +625,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
           </select>
           <input type="text" id="mn-placa-custom" placeholder="Digite a placa..." autocomplete="off" style="display:none;margin-top:6px;width:100%;border:1.5px solid #d0d0d0;border-radius:10px;padding:12px 14px;font-size:15px;font-family:monospace;font-weight:600;text-transform:uppercase;" />
         </div>
-        <div class="ffield"><label>Motorista</label><div class="motorista-display" id="mn-motorista-display">—</div><input type="hidden" id="mn-motorista" /></div>
+        <div class="ffield">
+          <label>Motorista</label>
+          <select class="placa-sel" id="mn-motorista" onchange="onMotoristaChange('mn')">
+            <option value="">Selecione...</option>
+            <option>Dani Ramon</option>
+            <option>Diego Maciel</option>
+            <option>Rodrigo Marques</option>
+            <option>Paulo Perfeito</option>
+            <option value="outro">✏️ Outro</option>
+          </select>
+          <input type="text" id="mn-motorista-custom" placeholder="Digite o nome..." style="display:none;margin-top:6px;width:100%;border:1.5px solid #d0d0d0;border-radius:10px;padding:12px 14px;font-size:15px;font-family:inherit;font-weight:600;" />
+        </div>
       </div>
     </div>
     <div class="fcard">
@@ -751,12 +784,16 @@ function toggleOutroMotorista() {
   }
 }
 
+function onMotoristaChange(prefix) {
+  const sel = document.getElementById(prefix+'-motorista');
+  const custom = document.getElementById(prefix+'-motorista-custom');
+  if (!sel || !custom) return;
+  custom.style.display = sel.value === 'outro' ? 'block' : 'none';
+}
+
 function preencherMotoristas(nome) {
   ['e','ab','mn'].forEach(p => {
-    const disp = document.getElementById(p+'-motorista-display');
-    const inp  = document.getElementById(p+'-motorista');
-    if (disp) disp.textContent = nome;
-    if (inp)  inp.value = nome;
+    setLocalVal(p+'-motorista', nome);
   });
 }
 
@@ -1203,7 +1240,7 @@ const RASCUNHO_KEY = 'mb_coleta_rascunho';
 const RASCUNHO_FULL_KEY = 'mb_entrega_full';
 
 function autoSalvarEntregaFull() {
-  const ids = ['e-placa','e-motorista','e-data-coleta','e-hora-coleta',
+  const ids = ['e-placa','e-motorista','e-motorista-custom','e-data-coleta','e-hora-coleta',
     'f-orig-local','f-orig-local-custom','sel-orig-tipo','f-orig-ndoc','f-orig-prod','f-orig-outro','f-orig-qtd',
     'e-data-destino','e-hora-destino',
     'f-dest-local','f-dest-local-custom','sel-dest-tipo','f-dest-ndoc','f-dest-prod','f-dest-outro','f-dest-qtd'];
@@ -1297,7 +1334,7 @@ let _enviando = false;
 async function enviarEntrega() {
   if (_enviando) return;
   const placa      = getPlacaVal('e');
-  const motorista  = document.getElementById('e-motorista').value.trim();
+  const motorista  = getLocalVal('e-motorista');
   const coleta     = getLocalVal('f-orig-local');
   const destino    = getLocalVal('f-dest-local');
   const tipoOrig   = document.getElementById('sel-orig-tipo').value;
@@ -1373,7 +1410,7 @@ async function enviarEntrega() {
 async function enviarAbast() {
   if (_enviando) return;
   const placa = getPlacaVal('ab');
-  const motorista = document.getElementById('ab-motorista').value.trim();
+  const motorista = getLocalVal('ab-motorista');
   if(!placa) { mostrarErro('erro-abast','Informe a placa do veículo.'); return; }
   if(!motorista) { mostrarErro('erro-abast','Informe o motorista.'); return; }
   _enviando = true;
@@ -1408,7 +1445,7 @@ async function enviarAbast() {
 async function enviarManut() {
   if (_enviando) return;
   const placa = getPlacaVal('mn');
-  const motorista = document.getElementById('mn-motorista').value.trim();
+  const motorista = getLocalVal('mn-motorista');
   if(!placa) { mostrarErro('erro-manut','Informe a placa do veículo.'); return; }
   if(!motorista) { mostrarErro('erro-manut','Informe o motorista.'); return; }
   _enviando = true;
@@ -1542,8 +1579,7 @@ criarAutocomplete('f-orig-local', LOCAIS_COLETA);
 const _motSalvo = localStorage.getItem('mb_motorista');
 if (_motSalvo) {
   ['e-motorista','ab-motorista','mn-motorista'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = _motSalvo;
+    setLocalVal(id, _motSalvo);
   });
 }
 
